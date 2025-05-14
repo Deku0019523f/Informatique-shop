@@ -15,6 +15,13 @@
     button { background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
     button:hover { background: #0056b3; }
 
+    .product img {
+      width: 100%;
+      max-height: 150px;
+      object-fit: cover;
+      margin-bottom: 10px;
+    }
+
     #cart { background: #fff; padding: 15px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
     #cart h3 { margin-top: 0; }
     .total { font-weight: bold; margin-top: 10px; }
@@ -26,7 +33,8 @@
 <body>
 
 <header>
-  <h1>Actus Informatique Shop</h1>
+  <img src="images/logo.png" alt="Logo Actus Informatique" style="height: 60px; vertical-align: middle;">
+  <h1 style="display:inline; margin-left: 10px;">Actus Informatique Shop</h1>
   <nav>
     <a href="#">Accueil</a>
     <a href="#">Produits</a>
@@ -54,118 +62,132 @@
   </section>
 
   <section>
-<h2>Produits</h2>
+    <h2>Produits</h2>
+<!-- Catégorie FREE -->
+    <h3>FREE</h3>
+    <div class="product">
+      <img src="images/cours-wifi.jpg" alt="Cours WiFi">
+      <h4>Cours WiFi</h4>
+      <p><a href="https://drive.google.com/drive/folders/1spCp8DPcJ6arj4PVoLESj6yRH69_xkj_" target="_blank">Accéder aux fichiers</a></p>
+      <p>Prix : Gratuit</p>
+      <button onclick="addToCart('Cours WiFi', 0)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/bot-whatsapp.jpg" alt="Bot WhatsApp">
+      <h4>Bot WhatsApp</h4>
+      <p><a href="https://drive.google.com/file/d/14aCB7IEuImZyiy9mofKUMVlor9xpI5Gi/view?usp=drivesdk" target="_blank">Télécharger</a></p>
+      <p>Prix : Gratuit</p>
+      <button onclick="addToCart('Bot WhatsApp', 0)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/script-host-fonctionnel.jpg" alt="Script Host Fonctionnel">
+      <h4>Script Host Fonctionnel</h4>
+      <p><a href="https://t.me/+4Q7VehxNaOk0YjU0" target="_blank">Voir sur Telegram</a></p>
+      <p>Prix : Gratuit</p>
+      <button onclick="addToCart('Script Host Fonctionnel', 0)">Ajouter au panier</button>
+    </div>
 
-  <h3>FREE</h3>
-  <div class="product">
-    <h4>Cours WiFi</h4>
-    <p><a href="https://drive.google.com/drive/folders/1spCp8DPcJ6arj4PVoLESj6yRH69_xkj_" target="_blank">Accéder aux fichiers</a></p>
-    <p>Prix : Gratuit</p>
-    <button onclick="addToCart('Cours WiFi', 0)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Bot WhatsApp</h4>
-    <p><a href="https://drive.google.com/file/d/14aCB7IEuImZyiy9mofKUMVlor9xpI5Gi/view?usp=drivesdk" target="_blank">Télécharger</a></p>
-    <p>Prix : Gratuit</p>
-    <button onclick="addToCart('Bot WhatsApp', 0)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Script Host Fonctionnel</h4>
-    <p><a href="https://t.me/+4Q7VehxNaOk0YjU0" target="_blank">Voir sur Telegram</a></p>
-    <p>Prix : Gratuit</p>
-    <button onclick="addToCart('Script Host Fonctionnel', 0)">Ajouter au panier</button>
-  </div>
-
-  
-  <h3>Abonnement</h3>
-  <div class="product">
-    <h4>Internet Orange CI - 80 Go</h4>
-    <p>Prix : 8000 FCFA</p>
-    <button onclick="addToCart('Internet 80Go', 8000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Internet Orange CI - 100 Go</h4>
-    <p>Prix : 13000 FCFA</p>
-    <button onclick="addToCart('Internet 100Go', 13000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Internet Orange CI - 48 Go</h4>
-    <p>Prix : 6500 FCFA</p>
-    <button onclick="addToCart('Internet 48Go', 6500)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>BOOSTAGE TIKTOK - 1000 abonnés</h4>
-    <p>Prix : 1500 FCFA</p>
-    <button onclick="addToCart('TikTok 1000 abonnés', 1500)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>BOOSTAGE YOUTUBE - 1000 abonnés</h4>
-    <p>Prix : 5000 FCFA</p>
-    <button onclick="addToCart('YouTube 1000 abonnés', 5000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>BOOSTAGE INSTAGRAM - 1000 abonnés</h4>
-    <p>Prix : 1000 FCFA</p>
-    <button onclick="addToCart('Instagram 1000 abonnés', 1000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Netflix - 1 mois</h4>
-    <p>Prix : 2400 FCFA</p>
-    <button onclick="addToCart('Netflix 1 mois', 2400)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Netflix - 3 mois</h4>
-    <p>Prix : 7000 FCFA</p>
-    <button onclick="addToCart('Netflix 3 mois', 7000)">Ajouter au panier</button>
-  </div>
-
-  <div class="product">
-    <h4>VPS 2GB RAM</h4>
-    <p>Prix : 2500 FCFA</p>
-    <button onclick="addToCart('VPS 2GB RAM', 2500)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>VPS 4GB RAM</h4>
-    <p>Prix : 4000 FCFA</p>
-    <button onclick="addToCart('VPS 4GB RAM', 4000)">Ajouter au panier</button>
-  </div>
-
-  
-  <h3>Logiciel</h3>
-  <div class="product">
-    <h4>Logiciel d’espionnage</h4>
-    <p>Prix : 3000 FCFA</p>
-    <button onclick="addToCart('Logiciel espion', 3000)">Ajouter au panier</button>
-  </div>
-
-  <div class="product">
-    <h4>Script Chumogh SSH #SLOWDNS</h4>
-    <p>Prix : 5000 FCFA</p>
-    <button onclick="addToCart('Script Chumogh SSH', 5000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Script + VPS pour WhatsApp Bot</h4>
-    <p>Cet achat vous donne également droit à un VPS de 1 GB de RAM pour l'installation.</p>
-    <p>Prix : 3000 FCFA</p>
-    <button onclick="addToCart('Script + VPS WhatsApp Bot', 3000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Hack caméra frontale avec Termux</h4>
-    <p>Prix : 2000 FCFA</p>
-    <button onclick="addToCart('Hack Caméra Termux', 2000)">Ajouter au panier</button>
-  </div>
-  <div class="product">
-    <h4>Outils de Phishing avec Termux</h4>
-    <p>À but éducatif uniquement — Utilise-les de manière responsable.</p>
-    <p>Prix : 3000 FCFA</p>
-    <button onclick="addToCart('Outils Phishing Termux', 3000)">Ajouter au panier</button>
-  </div>
-</section>
-
+    <!-- Catégorie Abonnement -->
+    <h3>Abonnement</h3>
+    <div class="product">
+      <img src="images/internet-orange-ci-80-go.jpg" alt="Internet Orange 80 Go">
+      <h4>Internet Orange CI - 80 Go</h4>
+      <p>Prix : 8000 FCFA</p>
+      <button onclick="addToCart('Internet 80Go', 8000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/internet-orange-ci-100-go.jpg" alt="Internet Orange 100 Go">
+      <h4>Internet Orange CI - 100 Go</h4>
+      <p>Prix : 13000 FCFA</p>
+      <button onclick="addToCart('Internet 100Go', 13000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/internet-orange-ci-48-go.jpg" alt="Internet Orange 48 Go">
+      <h4>Internet Orange CI - 48 Go</h4>
+      <p>Prix : 6500 FCFA</p>
+      <button onclick="addToCart('Internet 48Go', 6500)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/boostage-tiktok.jpg" alt="Boostage TikTok">
+      <h4>BOOSTAGE TIKTOK - 1000 abonnés</h4>
+      <p>Prix : 1500 FCFA</p>
+      <button onclick="addToCart('TikTok 1000 abonnés', 1500)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/boostage-youtube.jpg" alt="Boostage YouTube">
+      <h4>BOOSTAGE YOUTUBE - 1000 abonnés</h4>
+      <p>Prix : 5000 FCFA</p>
+      <button onclick="addToCart('YouTube 1000 abonnés', 5000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/boostage-instagram.jpg" alt="Boostage Instagram">
+      <h4>BOOSTAGE INSTAGRAM - 1000 abonnés</h4>
+      <p>Prix : 1000 FCFA</p>
+      <button onclick="addToCart('Instagram 1000 abonnés', 1000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/netflix-1-mois.jpg" alt="Netflix - 1 mois">
+      <h4>Netflix - 1 mois</h4>
+      <p>Prix : 2400 FCFA</p>
+      <button onclick="addToCart('Netflix 1 mois', 2400)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/netflix-3-mois.jpg" alt="Netflix - 3 mois">
+      <h4>Netflix - 3 mois</h4>
+      <p>Prix : 7000 FCFA</p>
+      <button onclick="addToCart('Netflix 3 mois', 7000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/vps-2gb-ram.jpg" alt="VPS 2GB RAM">
+      <h4>VPS 2GB RAM</h4>
+      <p>Prix : 2500 FCFA</p>
+      <button onclick="addToCart('VPS 2GB RAM', 2500)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/vps-4gb-ram.jpg" alt="VPS 4GB RAM">
+      <h4>VPS 4GB RAM</h4>
+      <p>Prix : 4000 FCFA</p>
+      <button onclick="addToCart('VPS 4GB RAM', 4000)">Ajouter au panier</button>
+    </div>
+<!-- Catégorie Logiciel -->
+    <h3>Logiciel</h3>
+    <div class="product">
+      <img src="images/logiciel-espionnage.jpg" alt="Logiciel d’espionnage">
+      <h4>Logiciel d’espionnage</h4>
+      <p>Prix : 3000 FCFA</p>
+      <button onclick="addToCart('Logiciel espion', 3000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/script-chumogh-ssh.jpg" alt="Script Chumogh SSH #SLOWDNS">
+      <h4>Script Chumogh SSH #SLOWDNS</h4>
+      <p>Prix : 5000 FCFA</p>
+      <button onclick="addToCart('Script Chumogh SSH', 5000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/script-vps-whatsapp.jpg" alt="Script + VPS pour WhatsApp Bot">
+      <h4>Script + VPS pour WhatsApp Bot</h4>
+      <p>Cet achat vous donne également droit à un VPS de 1 GB de RAM pour l'installation.</p>
+      <p>Prix : 3000 FCFA</p>
+      <button onclick="addToCart('Script + VPS WhatsApp Bot', 3000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/hack-camera-termux.jpg" alt="Hack caméra frontale avec Termux">
+      <h4>Hack caméra frontale avec Termux</h4>
+      <p>Prix : 2000 FCFA</p>
+      <button onclick="addToCart('Hack Caméra Termux', 2000)">Ajouter au panier</button>
+    </div>
+    <div class="product">
+      <img src="images/outils-phishing-termux.jpg" alt="Outils de Phishing avec Termux">
+      <h4>Outils de Phishing avec Termux</h4>
+      <p>À but éducatif uniquement — Utilise-les de manière responsable.</p>
+      <p>Prix : 3000 FCFA</p>
+      <button onclick="addToCart('Outils Phishing Termux', 3000)">Ajouter au panier</button>
+    </div>
+  </section>
 </main>
 
 <footer>
-  WhatsApp : <a href="https://wa.me/2250575719113" style="color: #4af;">Clique ici</a> | 
+  WhatsApp : <a href="https://wa.me/2250575719113" style="color: #4af;">Clique ici</a> |
   Télégram : <a href="https://t.me/deku225" style="color: #4af;">@deku225</a><br>
   Paiements : Orange / MTN / Wave / Crypto<br>
   &copy; 2025 Actus Informatique Shop
