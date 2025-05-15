@@ -21,7 +21,12 @@ const products = [
     img: "images/script-host-fonctionnel.jpg",
     link: "https://t.me/+4Q7VehxNaOk0YjU0"
   },
-
+  { tilte: "Regarder vos films, séries, animes et manga préférés gratuitement "
+    price: 0,
+    category: "FREE",
+    img: "images/cinéma.jpg",
+    link: "https://t.me/+4Q7VehxNaOk0YjU0"
+  },
   // Produits payants
   {
     title: "Internet Orange CI - 80 Go",
