@@ -1,50 +1,55 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE html><html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Actus Informatique Shop</title>
   <style>
     body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
-    header { background: #222; color: white; padding: 1em; text-align: center; }
+    header, footer { background: #222; color: white; padding: 1em; text-align: center; }
     nav a { color: white; margin: 0 10px; text-decoration: none; }
     main { padding: 20px; }
-    h2 { color: #007bff; border-bottom: 1px solid #ccc; padding-bottom: 5px; }
+    h2 { color: #007bff; border-bottom: 1px solid #ccc; padding-bottom: 5px; }.product, .cart-item { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+button { background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
+button:hover { background: #0056b3; }
 
-    .product, .cart-item { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    button { background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-    button:hover { background: #0056b3; }
+.product img {
+  width: 100%; max-height: 150px; object-fit: cover; margin-bottom: 10px;
+}
 
-    .product img {
-      width: 100%;
-      max-height: 150px;
-      object-fit: cover;
-      margin-bottom: 10px;
-    }
+#cart, #filters { background: #fff; padding: 15px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+.total { font-weight: bold; margin-top: 10px; }
+.popup { background: #28a745; color: white; padding: 5px 10px; border-radius: 5px; margin-top: 5px; display: none; }
 
-    #cart { background: #fff; padding: 15px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    #cart h3 { margin-top: 0; }
-    .total { font-weight: bold; margin-top: 10px; }
+input, select { padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; width: 100%; max-width: 300px; }
+#search-bar { width: 100%; max-width: 400px; padding: 10px; margin: 20px auto; display: block; }
+#cart-summary { position: fixed; top: 10px; right: 10px; background: #007bff; color: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
 
-    footer { background: #222; color: white; text-align: center; padding: 15px; margin-top: 40px; }
-    input, select { padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; width: 100%; max-width: 300px; }
   </style>
 </head>
-<body>
-
-<header>
+<body><header>
   <img src="images/logo.png" alt="Logo Actus Informatique" style="height: 60px; vertical-align: middle;">
   <h1 style="display:inline; margin-left: 10px;">Actus Informatique Shop</h1>
   <nav>
     <a href="#">Accueil</a>
     <a href="#">Produits</a>
     <a href="#">Panier</a>
-    <a href="#">Contact</a>
+    <a href="#contact">Contact</a>
   </nav>
-</header>
-
-<main>
-
+</header><div id="cart-summary">Total : <span id="summary-total">0 FCFA</span></div>
+<input type="text" id="search-bar" placeholder="Rechercher un produit..." /><section id="filters">
+  <h3>Filtres</h3>
+  <select id="category-filter">
+    <option value="">Toutes les catégories</option>
+    <option value="FREE">FREE</option>
+    <option value="Abonnement">Abonnement</option>
+    <option value="Logiciel">Logiciel</option>
+  </select>
+  <select id="price-filter">
+    <option value="">Tous les prix</option>
+    <option value="low">Moins de 3000 FCFA</option>
+    <option value="high">Plus de 3000 FCFA</option>
+  </select>
+</section><main>
   <section id="cart">
     <h3>Panier</h3>
     <div id="cart-items">Aucun produit pour le moment.</div>
@@ -59,213 +64,106 @@
     </select><br>
     <button onclick="clearCart()">Vider le panier</button>
     <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
+  </section>  <section id="product-list"></section>  <section id="contact">
+    <h2>Contact</h2>
+    <form onsubmit="event.preventDefault(); alert('Message envoyé !');">
+      <input type="text" placeholder="Nom" required><br>
+      <input type="email" placeholder="Email" required><br>
+      <textarea placeholder="Message" rows="4" style="width:100%; max-width:400px;" required></textarea><br>
+      <button type="submit">Envoyer</button>
+    </form>
   </section>
-
-  <section>
-    <h2>Produits</h2>
-<!-- Catégorie FREE -->
-    <h3>FREE</h3>
-    <div class="product">
-      <img src="images/cours-wifi.jpg" alt="Cours WiFi">
-      <h4>Cours WiFi</h4>
-      <p><a href="https://drive.google.com/drive/folders/1spCp8DPcJ6arj4PVoLESj6yRH69_xkj_" target="_blank">Accéder aux fichiers</a></p>
-      <p>Prix : Gratuit</p>
-      <button onclick="addToCart('Cours WiFi', 0)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/bot-whatsapp.jpg" alt="Bot WhatsApp">
-      <h4>Bot WhatsApp</h4>
-      <p><a href="https://drive.google.com/file/d/14aCB7IEuImZyiy9mofKUMVlor9xpI5Gi/view?usp=drivesdk" target="_blank">Télécharger</a></p>
-      <p>Prix : Gratuit</p>
-      <button onclick="addToCart('Bot WhatsApp', 0)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/script-host-fonctionnel.jpg" alt="Script Host Fonctionnel">
-      <h4>Script Host Fonctionnel</h4>
-      <p><a href="https://t.me/+4Q7VehxNaOk0YjU0" target="_blank">Voir sur Telegram</a></p>
-      <p>Prix : Gratuit</p>
-      <button onclick="addToCart('Script Host Fonctionnel', 0)">Ajouter au panier</button>
-    </div>
-
-    <!-- Catégorie Abonnement -->
-    <h3>Abonnement</h3>
-    <div class="product">
-      <img src="images/internet-orange-ci-80-go.jpg" alt="Internet Orange 80 Go">
-      <h4>Internet Orange CI - 80 Go</h4>
-      <p>Prix : 8000 FCFA</p>
-      <button onclick="addToCart('Internet 80Go', 8000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/internet-orange-ci-100-go.jpg" alt="Internet Orange 100 Go">
-      <h4>Internet Orange CI - 100 Go</h4>
-      <p>Prix : 13000 FCFA</p>
-      <button onclick="addToCart('Internet 100Go', 13000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/internet-orange-ci-48-go.jpg" alt="Internet Orange 48 Go">
-      <h4>Internet Orange CI - 48 Go</h4>
-      <p>Prix : 6500 FCFA</p>
-      <button onclick="addToCart('Internet 48Go', 6500)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/boostage-tiktok.jpg" alt="Boostage TikTok">
-      <h4>BOOSTAGE TIKTOK - 1000 abonnés</h4>
-      <p>Prix : 1500 FCFA</p>
-      <button onclick="addToCart('TikTok 1000 abonnés', 1500)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/boostage-youtube.jpg" alt="Boostage YouTube">
-      <h4>BOOSTAGE YOUTUBE - 1000 abonnés</h4>
-      <p>Prix : 5000 FCFA</p>
-      <button onclick="addToCart('YouTube 1000 abonnés', 5000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/boostage-instagram.jpg" alt="Boostage Instagram">
-      <h4>BOOSTAGE INSTAGRAM - 1000 abonnés</h4>
-      <p>Prix : 1000 FCFA</p>
-      <button onclick="addToCart('Instagram 1000 abonnés', 1000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/netflix-1-mois.jpg" alt="Netflix - 1 mois">
-      <h4>Netflix - 1 mois</h4>
-      <p>Prix : 2400 FCFA</p>
-      <button onclick="addToCart('Netflix 1 mois', 2400)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/netflix-3-mois.jpg" alt="Netflix - 3 mois">
-      <h4>Netflix - 3 mois</h4>
-      <p>Prix : 7000 FCFA</p>
-      <button onclick="addToCart('Netflix 3 mois', 7000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/vps-2gb-ram.jpg" alt="VPS 2GB RAM">
-      <h4>VPS 2GB RAM</h4>
-      <p>Prix : 2500 FCFA</p>
-      <button onclick="addToCart('VPS 2GB RAM', 2500)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/vps-4gb-ram.jpg" alt="VPS 4GB RAM">
-      <h4>VPS 4GB RAM</h4>
-      <p>Prix : 4000 FCFA</p>
-      <button onclick="addToCart('VPS 4GB RAM', 4000)">Ajouter au panier</button>
-    </div>
-<!-- Catégorie Logiciel -->
-    <h3>Logiciel</h3>
-    <div class="product">
-      <img src="images/logiciel-espionnage.jpg" alt="Logiciel d’espionnage">
-      <h4>Logiciel d’espionnage</h4>
-      <p>Prix : 3000 FCFA</p>
-      <button onclick="addToCart('Logiciel espion', 3000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/script-chumogh-ssh.jpg" alt="Script Chumogh SSH #SLOWDNS">
-      <h4>Script Chumogh SSH #SLOWDNS</h4>
-      <p>Prix : 5000 FCFA</p>
-      <button onclick="addToCart('Script Chumogh SSH', 5000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/script-vps-whatsapp.jpg" alt="Script + VPS pour WhatsApp Bot">
-      <h4>Script + VPS pour WhatsApp Bot</h4>
-      <p>Cet achat vous donne également droit à un VPS de 1 GB de RAM pour l'installation.</p>
-      <p>Prix : 3000 FCFA</p>
-      <button onclick="addToCart('Script + VPS WhatsApp Bot', 3000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/hack-camera-termux.jpg" alt="Hack caméra frontale avec Termux">
-      <h4>Hack caméra frontale avec Termux</h4>
-      <p>Prix : 2000 FCFA</p>
-      <button onclick="addToCart('Hack Caméra Termux', 2000)">Ajouter au panier</button>
-    </div>
-    <div class="product">
-      <img src="images/outils-phishing-termux.jpg" alt="Outils de Phishing avec Termux">
-      <h4>Outils de Phishing avec Termux</h4>
-      <p>À but éducatif uniquement — Utilise-les de manière responsable.</p>
-      <p>Prix : 3000 FCFA</p>
-      <button onclick="addToCart('Outils Phishing Termux', 3000)">Ajouter au panier</button>
-    </div>
-  </section>
-</main>
-
-<footer>
+</main><footer>
   WhatsApp : <a href="https://wa.me/2250575719113" style="color: #4af;">Clique ici</a> |
   Télégram : <a href="https://t.me/deku225" style="color: #4af;">@deku225</a><br>
   Paiements : Orange / MTN / Wave / Crypto<br>
   &copy; 2025 Actus Informatique Shop
-</footer>
+</footer><script src="products.js"></script><script>
+let cart = JSON.parse(localStorage.getItem("cart")) || [];
 
-<script>
-  let cart = [];
+function renderProducts() {
+  const list = document.getElementById("product-list");
+  list.innerHTML = "";
+  const search = document.getElementById("search-bar").value.toLowerCase();
+  const cat = document.getElementById("category-filter").value;
+  const price = document.getElementById("price-filter").value;
 
-  function addToCart(name, price) {
-    const existing = cart.find(item => item.name === name);
-    if (existing) {
-      existing.qty += 1;
-    } else {
-      cart.push({ name, price, qty: 1 });
-    }
-    updateCart();
+  products.forEach(p => {
+    if (search && !p.title.toLowerCase().includes(search)) return;
+    if (cat && p.category !== cat) return;
+    if (price === "low" && p.price >= 3000) return;
+    if (price === "high" && p.price < 3000) return;
+
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <img src="${p.img}" alt="${p.title}"/>
+      <h4>${p.title}</h4>
+      <p>Prix : ${p.price === 0 ? "Gratuit" : p.price + " FCFA"}</p>
+      <button onclick="addToCart('${p.title}', ${p.price})">Ajouter au panier</button>
+      <div class="popup" id="popup-${p.title.replace(/\s+/g, '-')}">Ajouté !</div>
+    `;
+    list.appendChild(div);
+  });
+}
+
+function addToCart(name, price) {
+  const existing = cart.find(i => i.name === name);
+  if (existing) existing.qty++;
+  else cart.push({ name, price, qty: 1 });
+  localStorage.setItem("cart", JSON.stringify(cart));
+  updateCart();
+  const popup = document.getElementById("popup-" + name.replace(/\s+/g, '-'));
+  if (popup) {
+    popup.style.display = "inline-block";
+    setTimeout(() => { popup.style.display = "none"; }, 1000);
   }
+}
 
-  function updateCart() {
-    const cartItems = document.getElementById('cart-items');
-    const cartTotal = document.getElementById('cart-total');
-    const orderBtn = document.getElementById('order-btn');
+function updateCart() {
+  const cartItems = document.getElementById('cart-items');
+  const cartTotal = document.getElementById('cart-total');
+  const orderBtn = document.getElementById('order-btn');
+  const summaryTotal = document.getElementById('summary-total');
+  let total = 0;
 
-    if (cart.length === 0) {
-      cartItems.innerHTML = "Aucun produit pour le moment.";
-      cartTotal.innerHTML = "";
-      orderBtn.style.display = "none";
-      return;
-    }
+  cartItems.innerHTML = cart.length ? "" : "Aucun produit pour le moment.";
+  cart.forEach(item => {
+    const line = document.createElement('div');
+    line.className = "cart-item";
+    line.innerHTML = `${item.name} x ${item.qty} = ${item.qty * item.price} FCFA`;
+    cartItems.appendChild(line);
+    total += item.qty * item.price;
+  });
 
-    cartItems.innerHTML = "";
-    let total = 0;
-    cart.forEach(item => {
-      const line = document.createElement('div');
-      line.className = "cart-item";
-      line.innerHTML = `${item.name} x ${item.qty} = ${item.qty * item.price} FCFA`;
-      cartItems.appendChild(line);
-      total += item.qty * item.price;
-    });
+  cartTotal.innerHTML = `Total : ${total} FCFA`;
+  summaryTotal.innerText = `${total} FCFA`;
+  orderBtn.style.display = cart.length ? "inline-block" : "none";
+}
 
-    cartTotal.innerHTML = `Total : ${total} FCFA`;
-    orderBtn.style.display = "inline-block";
-  }
+function clearCart() {
+  cart = [];
+  localStorage.removeItem("cart");
+  updateCart();
+}
 
-  function clearCart() {
-    cart = [];
-    updateCart();
-  }
+function sendOrder() {
+  if (!cart.length) return;
+  const name = document.getElementById('client-name').value.trim();
+  const payment = document.getElementById('payment-method').value;
+  if (!name || !payment) return alert("Remplissez votre nom et méthode de paiement.");
+  let msg = `*Nouvelle commande :*%0A`;
+  let total = 0;
+  cart.forEach(i => { msg += `- ${i.name} x${i.qty} = ${i.qty * i.price} FCFA%0A`; total += i.qty * i.price; });
+  msg += `Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}`;
+  window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
+}
 
-  function sendOrder() {
-    if (cart.length === 0) return;
+['search-bar', 'category-filter', 'price-filter'].forEach(id => {
+  document.getElementById(id).addEventListener('input', renderProducts);
+});
 
-    const name = document.getElementById('client-name').value.trim();
-    const payment = document.getElementById('payment-method').value;
-
-    if (!name || !payment) {
-      alert("Veuillez remplir votre nom et choisir une méthode de paiement.");
-      return;
-    }
-
-    let message = "*Nouvelle commande Actus Informatique Shop :*%0A";
-    let total = 0;
-
-    cart.forEach(item => {
-      const subtotal = item.qty * item.price;
-      message += `- ${item.name} x${item.qty} = ${subtotal} FCFA%0A`;
-      total += subtotal;
-    });
-
-    message += `%0ATotal : *${total} FCFA*%0A`;
-    message += `%0A*Nom :* ${name}%0A*Paiement :* ${payment}%0A`;
-
-    const phoneNumber = "2250575719113";
-    const whatsappUrl = `https://wa.me/${phoneNumber}?text=${encodeURI(message)}`;
-
-    window.open(whatsappUrl, '_blank');
-  }
-</script>
-
-</body>
+renderProducts();
+updateCart();
+</script></body>
 </html>
