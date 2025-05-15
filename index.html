@@ -1,169 +1,60 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-  <title>Actus Informatique Shop</title>
+  <title>Informatique Shop</title>
   <style>
-    body { font-family: Arial, sans-serif; margin: 0; background: #f4f4f4; }
+    body { font-family: Arial; background: #f4f4f4; margin: 0; padding: 0; }
     header, footer { background: #222; color: white; padding: 1em; text-align: center; }
-    nav a { color: white; margin: 0 10px; text-decoration: none; }
     main { padding: 20px; }
-    h2 { color: #007bff; border-bottom: 1px solid #ccc; padding-bottom: 5px; }.product, .cart-item { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-button { background: #007bff; color: white; border: none; padding: 8px 12px; border-radius: 5px; cursor: pointer; margin-top: 10px; }
-button:hover { background: #0056b3; }
-
-.product img {
-  width: 100%; max-height: 150px; object-fit: cover; margin-bottom: 10px;
-}
-
-#cart, #filters { background: #fff; padding: 15px; margin-bottom: 30px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-.total { font-weight: bold; margin-top: 10px; }
-.popup { background: #28a745; color: white; padding: 5px 10px; border-radius: 5px; margin-top: 5px; display: none; }
-
-input, select { padding: 8px; margin: 5px 0; border-radius: 5px; border: 1px solid #ccc; width: 100%; max-width: 300px; }
-#search-bar { width: 100%; max-width: 400px; padding: 10px; margin: 20px auto; display: block; }
-#cart-summary { position: fixed; top: 10px; right: 10px; background: #007bff; color: white; padding: 10px 20px; border-radius: 10px; box-shadow: 0 0 10px rgba(0,0,0,0.2); }
-
+    .product { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 6px; }
+    button { background: #007bff; color: white; border: none; padding: 10px; margin-top: 10px; border-radius: 5px; cursor: pointer; }
+    button:hover { background: #0056b3; }
+    a { text-decoration: none; }
   </style>
 </head>
-<body><header>
-  <img src="images/logo.png" alt="Logo Actus Informatique" style="height: 60px; vertical-align: middle;">
-  <h1 style="display:inline; margin-left: 10px;">Actus Informatique Shop</h1>
-  <nav>
-    <a href="#">Accueil</a>
-    <a href="#">Produits</a>
-    <a href="#">Panier</a>
-    <a href="#contact">Contact</a>
-  </nav>
-</header><div id="cart-summary">Total : <span id="summary-total">0 FCFA</span></div>
-<input type="text" id="search-bar" placeholder="Rechercher un produit..." /><section id="filters">
-  <h3>Filtres</h3>
-  <select id="category-filter">
-    <option value="">Toutes les catégories</option>
-    <option value="FREE">FREE</option>
-    <option value="Abonnement">Abonnement</option>
-    <option value="Logiciel">Logiciel</option>
-  </select>
-  <select id="price-filter">
-    <option value="">Tous les prix</option>
-    <option value="low">Moins de 3000 FCFA</option>
-    <option value="high">Plus de 3000 FCFA</option>
-  </select>
-</section><main>
-  <section id="cart">
-    <h3>Panier</h3>
-    <div id="cart-items">Aucun produit pour le moment.</div>
-    <div class="total" id="cart-total"></div>
-    <input type="text" id="client-name" placeholder="Votre nom (obligatoire)" />
-    <select id="payment-method">
-      <option value="">Méthode de paiement</option>
-      <option value="Orange">Orange</option>
-      <option value="MTN">MTN</option>
-      <option value="Wave">Wave</option>
-      <option value="Crypto">Crypto</option>
-    </select><br>
-    <button onclick="clearCart()">Vider le panier</button>
-    <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
-  </section>  <section id="product-list"></section>  <section id="contact">
-    <h2>Contact</h2>
-    <form onsubmit="event.preventDefault(); alert('Message envoyé !');">
-      <input type="text" placeholder="Nom" required><br>
-      <input type="email" placeholder="Email" required><br>
-      <textarea placeholder="Message" rows="4" style="width:100%; max-width:400px;" required></textarea><br>
-      <button type="submit">Envoyer</button>
-    </form>
-  </section>
-</main><footer>
-  WhatsApp : <a href="https://wa.me/2250575719113" style="color: #4af;">Clique ici</a> |
-  Télégram : <a href="https://t.me/deku225" style="color: #4af;">@deku225</a><br>
-  Paiements : Orange / MTN / Wave / Crypto<br>
-  &copy; 2025 Actus Informatique Shop
-</footer><script src="products.js"></script><script>
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
+<body>
 
-function renderProducts() {
-  const list = document.getElementById("product-list");
-  list.innerHTML = "";
-  const search = document.getElementById("search-bar").value.toLowerCase();
-  const cat = document.getElementById("category-filter").value;
-  const price = document.getElementById("price-filter").value;
+<header>
+  <h1>Informatique Shop</h1>
+</header>
 
-  products.forEach(p => {
-    if (search && !p.title.toLowerCase().includes(search)) return;
-    if (cat && p.category !== cat) return;
-    if (price === "low" && p.price >= 3000) return;
-    if (price === "high" && p.price < 3000) return;
+<main>
+  <section id="product-list"></section>
+</main>
 
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <img src="${p.img}" alt="${p.title}"/>
-      <h4>${p.title}</h4>
-      <p>Prix : ${p.price === 0 ? "Gratuit" : p.price + " FCFA"}</p>
-      <button onclick="addToCart('${p.title}', ${p.price})">Ajouter au panier</button>
-      <div class="popup" id="popup-${p.title.replace(/\s+/g, '-')}">Ajouté !</div>
-    `;
-    list.appendChild(div);
-  });
-}
+<footer>
+  © 2025 Informatique Shop - Tous droits réservés
+</footer>
 
-function addToCart(name, price) {
-  const existing = cart.find(i => i.name === name);
-  if (existing) existing.qty++;
-  else cart.push({ name, price, qty: 1 });
-  localStorage.setItem("cart", JSON.stringify(cart));
-  updateCart();
-  const popup = document.getElementById("popup-" + name.replace(/\s+/g, '-'));
-  if (popup) {
-    popup.style.display = "inline-block";
-    setTimeout(() => { popup.style.display = "none"; }, 1000);
+<script src="products.js"></script>
+<script>
+  function renderProducts() {
+    const container = document.getElementById("product-list");
+    container.innerHTML = "";
+    products.forEach(p => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        <img src="${p.img}" alt="${p.title}">
+        <h3>${p.title}</h3>
+        <p>Prix : ${p.price === 0 ? "Gratuit" : p.price + " FCFA"}</p>
+        ${p.price === 0 && p.link
+          ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
+          : `<button onclick="addToCart('${p.title}', ${p.price})">Ajouter au panier</button>`}
+      `;
+      container.appendChild(div);
+    });
   }
-}
 
-function updateCart() {
-  const cartItems = document.getElementById('cart-items');
-  const cartTotal = document.getElementById('cart-total');
-  const orderBtn = document.getElementById('order-btn');
-  const summaryTotal = document.getElementById('summary-total');
-  let total = 0;
+  function addToCart(name, price) {
+    alert(`Produit '${name}' ajouté au panier (${price} FCFA)`);
+  }
 
-  cartItems.innerHTML = cart.length ? "" : "Aucun produit pour le moment.";
-  cart.forEach(item => {
-    const line = document.createElement('div');
-    line.className = "cart-item";
-    line.innerHTML = `${item.name} x ${item.qty} = ${item.qty * item.price} FCFA`;
-    cartItems.appendChild(line);
-    total += item.qty * item.price;
-  });
+  renderProducts();
+</script>
 
-  cartTotal.innerHTML = `Total : ${total} FCFA`;
-  summaryTotal.innerText = `${total} FCFA`;
-  orderBtn.style.display = cart.length ? "inline-block" : "none";
-}
-
-function clearCart() {
-  cart = [];
-  localStorage.removeItem("cart");
-  updateCart();
-}
-
-function sendOrder() {
-  if (!cart.length) return;
-  const name = document.getElementById('client-name').value.trim();
-  const payment = document.getElementById('payment-method').value;
-  if (!name || !payment) return alert("Remplissez votre nom et méthode de paiement.");
-  let msg = `*Nouvelle commande :*%0A`;
-  let total = 0;
-  cart.forEach(i => { msg += `- ${i.name} x${i.qty} = ${i.qty * i.price} FCFA%0A`; total += i.qty * i.price; });
-  msg += `Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}`;
-  window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
-}
-
-['search-bar', 'category-filter', 'price-filter'].forEach(id => {
-  document.getElementById(id).addEventListener('input', renderProducts);
-});
-
-renderProducts();
-updateCart();
-</script></body>
+</body>
 </html>
