@@ -5,13 +5,15 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Informatique Shop</title>
   <style>
-    body { font-family: Arial; background: #f4f4f4; margin: 0; padding: 0; }
-    header, footer { background: #222; color: white; padding: 1em; text-align: center; }
+    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    header, footer { background: #222; color: white; text-align: center; padding: 1rem; }
     main { padding: 20px; }
-    .product { background: white; padding: 15px; margin-bottom: 20px; border-radius: 8px; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
-    img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 6px; }
-    button { background: #007bff; color: white; border: none; padding: 10px; margin-top: 10px; border-radius: 5px; cursor: pointer; }
+    .product { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    img { width: 100%; max-height: 150px; object-fit: cover; border-radius: 5px; }
+    button { background: #007bff; color: white; border: none; padding: 10px; border-radius: 5px; margin-top: 10px; cursor: pointer; }
     button:hover { background: #0056b3; }
+    #cart, .cart-item { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
+    input, select { padding: 8px; margin-top: 10px; width: 100%; max-width: 300px; display: block; border-radius: 5px; border: 1px solid #ccc; }
     a { text-decoration: none; }
   </style>
 </head>
@@ -22,6 +24,22 @@
 </header>
 
 <main>
+  <section id="cart">
+    <h3>Panier</h3>
+    <div id="cart-items">Aucun produit pour le moment.</div>
+    <div id="cart-total" style="font-weight:bold; margin-top:10px;"></div>
+    <input type="text" id="client-name" placeholder="Votre nom (obligatoire)" />
+    <select id="payment-method">
+      <option value="">Méthode de paiement</option>
+      <option value="Orange">Orange</option>
+      <option value="MTN">MTN</option>
+      <option value="Wave">Wave</option>
+      <option value="Crypto">Crypto</option>
+    </select>
+    <button onclick="clearCart()">Vider le panier</button>
+    <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
+  </section>
+
   <section id="product-list"></section>
 </main>
 
@@ -31,6 +49,8 @@
 
 <script src="products.js"></script>
 <script>
+  let cart = JSON.parse(localStorage.getItem("cart")) || [];
+
   function renderProducts() {
     const container = document.getElementById("product-list");
     container.innerHTML = "";
@@ -50,10 +70,67 @@
   }
 
   function addToCart(name, price) {
-    alert(`Produit '${name}' ajouté au panier (${price} FCFA)`);
+    const existing = cart.find(item => item.name === name);
+    if (existing) {
+      existing.qty++;
+    } else {
+      cart.push({ name, price, qty: 1 });
+    }
+    localStorage.setItem("cart", JSON.stringify(cart));
+    updateCart();
+  }
+
+  function updateCart() {
+    const items = document.getElementById("cart-items");
+    const total = document.getElementById("cart-total");
+    const orderBtn = document.getElementById("order-btn");
+    let sum = 0;
+    items.innerHTML = "";
+    if (cart.length === 0) {
+      items.textContent = "Aucun produit pour le moment.";
+      total.textContent = "";
+      orderBtn.style.display = "none";
+      return;
+    }
+
+    cart.forEach(item => {
+      const line = document.createElement("div");
+      line.className = "cart-item";
+      line.textContent = `${item.name} x ${item.qty} = ${item.qty * item.price} FCFA`;
+      items.appendChild(line);
+      sum += item.qty * item.price;
+    });
+
+    total.textContent = `Total : ${sum} FCFA`;
+    orderBtn.style.display = "block";
+  }
+
+  function clearCart() {
+    cart = [];
+    localStorage.removeItem("cart");
+    updateCart();
+  }
+
+  function sendOrder() {
+    const name = document.getElementById("client-name").value.trim();
+    const payment = document.getElementById("payment-method").value;
+    if (!name || !payment || cart.length === 0) {
+      alert("Remplissez toutes les informations.");
+      return;
+    }
+
+    let msg = `*Nouvelle commande :*%0A`;
+    let total = 0;
+    cart.forEach(i => {
+      msg += `- ${i.name} x${i.qty} = ${i.qty * i.price} FCFA%0A`;
+      total += i.qty * i.price;
+    });
+    msg += `Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}`;
+    window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
   }
 
   renderProducts();
+  updateCart();
 </script>
 
 </body>
