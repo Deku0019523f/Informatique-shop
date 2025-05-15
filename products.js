@@ -15,7 +15,8 @@ const products = [
   { title: "Netflix - 3 mois", price: 7000, category: "Abonnement", img: "images/netflix-3-mois.jpg" },
   { title: "VPS 2GB RAM", price: 2500, category: "Abonnement", img: "images/vps-2gb-ram.jpg" },
   { title: "VPS 4GB RAM", price: 4000, category: "Abonnement", img: "images/vps-4gb-ram.jpg" },
-
+  { title: "TikTok français monétiser", price: 5000, category: "abonnement", img: "images/tiktok-monetiser.jpg" },
+  
   // Logiciel
   { title: "Logiciel d’espionnage", price: 3000, category: "Logiciel", img: "images/logiciel-espionnage.jpg" },
   { title: "Script Chumogh SSH #SLOWDNS", price: 5000, category: "Logiciel", img: "images/script-chumogh-ssh.jpg" },
