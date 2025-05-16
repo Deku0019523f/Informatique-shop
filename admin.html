@@ -91,7 +91,7 @@
         </select>
         <input type="text" id="img" placeholder="URL image (ex: images/nom.jpg)" required />
         <input type="text" id="link" placeholder="Lien de téléchargement (optionnel)" />
-        <!-- Champs pour promo -->
+        <!-- Champs promo -->
         <input type="number" id="discount-price" placeholder="Prix promotionnel (optionnel)" />
         <input type="datetime-local" id="discount-until" placeholder="Date/heure de fin promo (optionnel)" />
         <button type="submit">Ajouter / Modifier produit</button>
@@ -129,175 +129,184 @@
 
   </div>
 
+  <!-- Firebase SDKs -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
   <script>
-    const firebaseConfig = {
-      apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
-      authDomain: "informatique-shop-53a25.firebaseapp.com",
-      projectId: "informatique-shop-53a25",
-      storageBucket: "informatique-shop-53a25.firebasestorage.app",
-      messagingSenderId: "1070472171156",
-      appId: "1:1070472171156:web:6214bbe7726c12ce666e81",
-      measurementId: "G-WCQCBR1CNR"
-    };
-
-    firebase.initializeApp(firebaseConfig);
-    const auth = firebase.auth();
-    const db = firebase.firestore();
-
-    const loginDiv = document.getElementById('login-div');
-    const adminDiv = document.getElementById('admin-div');
-    const loginError = document.getElementById('login-error');
-
-    const productsTableBody = document.querySelector('#products-table tbody');
-    const ordersTableBody = document.querySelector('#orders-table tbody');
-    const reviewsTableBody = document.querySelector('#reviews-table tbody');
-
-    const productForm = document.getElementById('product-form');
-    const productIdInput = document.getElementById('product-id');
-    const titleInput = document.getElementById('title');
-    const priceInput = document.getElementById('price');
-    const categoryInput = document.getElementById('category');
-    const imgInput = document.getElementById('img');
-    const linkInput = document.getElementById('link');
-    const discountPriceInput = document.getElementById('discount-price');
-    const discountUntilInput = document.getElementById('discount-until');
-
-    // Auth State
-    auth.onAuthStateChanged(user => {
-      if (user) {
-        loginDiv.style.display = 'none';
-        adminDiv.classList.remove('hidden');
-        loadProducts();
-        loadOrders();
-        loadReviews();
-      } else {
-        loginDiv.style.display = 'block';
-        adminDiv.classList.add('hidden');
-      }
-    });
-
-    function login() {
-      const email = document.getElementById('email').value.trim();
-      const password = document.getElementById('password').value.trim();
-      loginError.textContent = '';
-      if (!email || !password) {
-        loginError.textContent = 'Veuillez remplir tous les champs.';
-        return;
-      }
-      auth.signInWithEmailAndPassword(email, password).catch(e => {
-        loginError.textContent = e.message;
-      });
-    }
-
-    function logout() {
-      auth.signOut();
-    }
-
-    // Load products from Firestore
-    function loadProducts() {
-      productsTableBody.innerHTML = '<tr><td colspan="5">Chargement...</td></tr>';
-      db.collection('products').orderBy('title').onSnapshot(snapshot => {
-        productsTableBody.innerHTML = '';
-        snapshot.forEach(doc => {
-          const p = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${p.title}</td>
-            <td>${p.price} FCFA</td>
-            <td>${p.category}</td>
-            <td>
-              ${p.discountPrice ? p.discountPrice + " FCFA" : "-"}
-              ${p.discountUntil ? `<br><small>Jusqu'au ${new Date(p.discountUntil.seconds * 1000).toLocaleString()}</small>` : ''}
-            </td>
-            <td>
-              <button onclick="editProduct('${doc.id}')">Modifier</button>
-              <button onclick="deleteProduct('${doc.id}')">Supprimer</button>
-            </td>
-          `;
-          productsTableBody.appendChild(tr);
-        });
-      });
-    }
-
-    // Add or update product
-    productForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const id = productIdInput.value;
-
-      const discountVal = discountPriceInput.value;
-      const discountUntilVal = discountUntilInput.value;
-
-      const data = {
-        title: titleInput.value.trim(),
-        price: Number(priceInput.value),
-        category: categoryInput.value,
-        img: imgInput.value.trim(),
-        link: linkInput.value.trim(),
-        discountPrice: discountVal ? Number(discountVal) : null,
-        discountUntil: discountUntilVal
-          ? firebase.firestore.Timestamp.fromDate(new Date(discountUntilVal))
-          : null
+    document.addEventListener('DOMContentLoaded', () => {
+      const firebaseConfig = {
+        apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
+        authDomain: "informatique-shop-53a25.firebaseapp.com",
+        projectId: "informatique-shop-53a25",
+        storageBucket: "informatique-shop-53a25.firebasestorage.app",
+        messagingSenderId: "1070472171156",
+        appId: "1:1070472171156:web:6214bbe7726c12ce666e81",
+        measurementId: "G-WCQCBR1CNR"
       };
 
-      if (!data.title || !data.category || !data.img || isNaN(data.price)) {
-        alert('Veuillez remplir correctement tous les champs obligatoires.');
-        return;
-      }
+      firebase.initializeApp(firebaseConfig);
+      const auth = firebase.auth();
+      const db = firebase.firestore();
 
-      if (id) {
-        db.collection('products').doc(id).update(data)
-          .then(() => {
-            alert('Produit modifié avec succès.');
-            productForm.reset();
-            productIdInput.value = '';
-          })
-          .catch(e => alert('Erreur : ' + e.message));
-      } else {
-        db.collection('products').add(data)
-          .then(() => {
-            alert('Produit ajouté avec succès.');
-            productForm.reset();
-          })
-          .catch(e => alert('Erreur : ' + e.message));
-      }
-    });
+      const loginDiv = document.getElementById('login-div');
+      const adminDiv = document.getElementById('admin-div');
+      const loginError = document.getElementById('login-error');
 
-    function editProduct(id) {
-      db.collection('products').doc(id).get().then(doc => {
-        if (doc.exists) {
-          const p = doc.data();
-          productIdInput.value = doc.id;
-          titleInput.value = p.title;
-          priceInput.value = p.price;
-          categoryInput.value = p.category;
-          imgInput.value = p.img;
-          linkInput.value = p.link || '';
-          discountPriceInput.value = p.discountPrice || '';
-          discountUntilInput.value = p.discountUntil
-            ? new Date(p.discountUntil.seconds * 1000).toISOString().slice(0,16)
-            : '';
-          window.scrollTo({top:0, behavior:'smooth'});
+      const productsTableBody = document.querySelector('#products-table tbody');
+      const ordersTableBody = document.querySelector('#orders-table tbody');
+      const reviewsTableBody = document.querySelector('#reviews-table tbody');
+
+      const productForm = document.getElementById('product-form');
+      const productIdInput = document.getElementById('product-id');
+      const titleInput = document.getElementById('title');
+      const priceInput = document.getElementById('price');
+      const categoryInput = document.getElementById('category');
+      const imgInput = document.getElementById('img');
+      const linkInput = document.getElementById('link');
+      const discountPriceInput = document.getElementById('discount-price');
+      const discountUntilInput = document.getElementById('discount-until');
+
+      auth.onAuthStateChanged(user => {
+        if (user) {
+          loginDiv.style.display = 'none';
+          adminDiv.classList.remove('hidden');
+          loadProducts();
+          loadOrders();
+          loadReviews();
+        } else {
+          loginDiv.style.display = 'block';
+          adminDiv.classList.add('hidden');
         }
       });
-    }
 
-    function deleteProduct(id) {
-      if (confirm('Supprimer ce produit ?')) {
-        db.collection('products').doc(id).delete()
-          .then(() => alert('Produit supprimé.'))
-          .catch(e => alert('Erreur : ' + e.message));
+      window.login = function() {
+        const email = document.getElementById('email').value.trim();
+        const password = document.getElementById('password').value.trim();
+        loginError.textContent = '';
+        if (!email || !password) {
+          loginError.textContent = 'Veuillez remplir tous les champs.';
+          return;
+        }
+        auth.signInWithEmailAndPassword(email, password)
+          .then(userCredential => {
+            console.log('Connecté:', userCredential.user.email);
+          })
+          .catch(e => {
+            loginError.textContent = e.message;
+            console.error('Erreur login:', e);
+          });
       }
-    }
 
-    // Load orders
-    function loadOrders() {
-      ordersTableBody.innerHTML = '<tr><td colspan="5">Chargement...</td></tr>';
-      db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-        ordersTableBody.innerHTML = '';
-        snapshot.forEach(doc => {
-          const o = doc.data();
-          const tr = document.createElement
+      window.logout = function() {
+        auth.signOut();
+      }
+
+      function loadProducts() {
+        productsTableBody.innerHTML = '<tr><td colspan="5">Chargement...</td></tr>';
+        db.collection('products').orderBy('title').onSnapshot(snapshot => {
+          productsTableBody.innerHTML = '';
+          snapshot.forEach(doc => {
+            const p = doc.data();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${p.title}</td>
+              <td>${p.price} FCFA</td>
+              <td>${p.category}</td>
+              <td>
+                ${p.discountPrice ? p.discountPrice + " FCFA" : "-"}
+                ${p.discountUntil ? `<br><small>Jusqu'au ${new Date(p.discountUntil.seconds * 1000).toLocaleString()}</small>` : ''}
+              </td>
+              <td>
+                <button onclick="editProduct('${doc.id}')">Modifier</button>
+                <button onclick="deleteProduct('${doc.id}')">Supprimer</button>
+              </td>
+            `;
+            productsTableBody.appendChild(tr);
+          });
+        });
+      }
+
+      productForm.addEventListener('submit', e => {
+        e.preventDefault();
+        const id = productIdInput.value;
+
+        const discountVal = discountPriceInput.value;
+        const discountUntilVal = discountUntilInput.value;
+
+        const data = {
+          title: titleInput.value.trim(),
+          price: Number(priceInput.value),
+          category: categoryInput.value,
+          img: imgInput.value.trim(),
+          link: linkInput.value.trim(),
+          discountPrice: discountVal ? Number(discountVal) : null,
+          discountUntil: discountUntilVal
+            ? firebase.firestore.Timestamp.fromDate(new Date(discountUntilVal))
+            : null
+        };
+
+        if (!data.title || !data.category || !data.img || isNaN(data.price)) {
+          alert('Veuillez remplir correctement tous les champs obligatoires.');
+          return;
+        }
+
+        if (id) {
+          db.collection('products').doc(id).update(data)
+            .then(() => {
+              alert('Produit modifié avec succès.');
+              productForm.reset();
+              productIdInput.value = '';
+            })
+            .catch(e => alert('Erreur : ' + e.message));
+        } else {
+          db.collection('products').add(data)
+            .then(() => {
+              alert('Produit ajouté avec succès.');
+              productForm.reset();
+            })
+            .catch(e => alert('Erreur : ' + e.message));
+        }
+      });
+
+      window.editProduct = function(id) {
+        db.collection('products').doc(id).get().then(doc => {
+          if (doc.exists) {
+            const p = doc.data();
+            productIdInput.value = doc.id;
+            titleInput.value = p.title;
+            priceInput.value = p.price;
+            categoryInput.value = p.category;
+            imgInput.value = p.img;
+            linkInput.value = p.link || '';
+            discountPriceInput.value = p.discountPrice || '';
+            discountUntilInput.value = p.discountUntil
+              ? new Date(p.discountUntil.seconds * 1000).toISOString().slice(0,16)
+              : '';
+            window.scrollTo({top:0, behavior:'smooth'});
+          }
+        });
+      }
+
+      window.deleteProduct = function(id) {
+        if (confirm('Supprimer ce produit ?')) {
+          db.collection('products').doc(id).delete()
+            .then(() => alert('Produit supprimé.'))
+            .catch(e => alert('Erreur : ' + e.message));
+        }
+      }
+
+      function loadOrders() {
+        ordersTableBody.innerHTML = '<tr><td colspan="5">Chargement...</td></tr>';
+        db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+          ordersTableBody.innerHTML = '';
+          snapshot.forEach(doc => {
+            const o = doc.data();
+            const tr = document.createElement('tr');
+            tr.innerHTML = `
+              <td>${o.clientName || 'N/A'}</td>
+              <td>${o.products ? o.products.map(p => `${p.title} x${p.qty}`).join('<br>') : ''}</td>
+              <td>${o.total || 0} FCFA</td>
+              <td>${o.paymentMethod || ''}</td>
+              <td>${o.timestamp
