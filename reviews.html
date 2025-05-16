@@ -1,0 +1,122 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Avis des clients - Firebase</title>
+  <style>
+    body { font-family: Arial; background: #f0f0f0; padding: 30px; }
+    .review-form, .reviews {
+      background: white;
+      max-width: 600px;
+      margin: auto;
+      padding: 20px;
+      border-radius: 8px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px;
+      border-radius: 5px;
+      margin-top: 10px;
+      cursor: pointer;
+    }
+    .review-entry {
+      margin-bottom: 15px;
+      border-bottom: 1px solid #ddd;
+      padding-bottom: 10px;
+    }
+  </style>
+</head>
+<body>
+
+<div class="review-form">
+  <h2>Laisser un avis</h2>
+  <input type="text" id="review-name" placeholder="Votre nom" required />
+  <input type="email" id="review-email" placeholder="Votre e-mail" required />
+  <textarea id="review-message" rows="5" placeholder="Votre message" required></textarea>
+  <button onclick="submitReview()">Envoyer</button>
+</div>
+
+<div class="reviews">
+  <h3>Avis récents</h3>
+  <div id="review-list">Chargement...</div>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  // Config Firebase (mets ici ta config)
+  const firebaseConfig = {
+    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
+    authDomain: "informatique-shop-53a25.firebaseapp.com",
+    projectId: "informatique-shop-53a25",
+    storageBucket: "informatique-shop-53a25.firebasestorage.app",
+    messagingSenderId: "1070472171156",
+    appId: "1:1070472171156:web:6214bbe7726c12ce666e81",
+    measurementId: "G-WCQCBR1CNR"
+  };
+
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  const reviewList = document.getElementById("review-list");
+
+  function renderReview(doc) {
+    const data = doc.data();
+    const div = document.createElement("div");
+    div.className = "review-entry";
+    div.innerHTML = `
+      <strong>${data.name}</strong> (${data.email})<br/>
+      <p>${data.message}</p>
+    `;
+    reviewList.prepend(div);
+  }
+
+  // Écoute temps réel Firestore
+  db.collection("reviews")
+    .orderBy("timestamp", "desc")
+    .onSnapshot(snapshot => {
+      reviewList.innerHTML = "";
+      snapshot.forEach(doc => renderReview(doc));
+      if(snapshot.empty) reviewList.textContent = "Aucun avis encore.";
+    });
+
+  function submitReview() {
+    const name = document.getElementById("review-name").value.trim();
+    const email = document.getElementById("review-email").value.trim();
+    const message = document.getElementById("review-message").value.trim();
+
+    if (!name || !email || !message) {
+      alert("Veuillez remplir tous les champs.");
+      return;
+    }
+
+    db.collection("reviews").add({
+      name,
+      email,
+      message,
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    }).then(() => {
+      alert("Merci pour votre avis !");
+      document.getElementById("review-name").value = "";
+      document.getElementById("review-email").value = "";
+      document.getElementById("review-message").value = "";
+    }).catch(err => {
+      alert("Erreur lors de l'envoi : " + err.message);
+    });
+  }
+</script>
+
+</body>
+</html>
