@@ -79,6 +79,18 @@ const products = [
     img: "images/netflix-3-mois.jpg"
   },
   {
+  "title": "Abonnement-IPTV-1mois",
+  "price": 3000,
+  "category": "Abonnement",
+  "img": "images/iptv1.jpg"
+},
+  {
+  "title": "Abonnement-IPTV-3mois",
+  "price": 8000,
+  "category": "Abonnement",
+  "img": "images/iptv2.jpg"
+},
+  {
     title: "VPS 2GB RAM",
     price: 2500,
     category: "Abonnement",
