@@ -36,6 +36,26 @@ function renderProducts(category = "All") {
   });
 }
 
+function renderFilteredProducts(products) {
+  const container = document.getElementById("product-list");
+  container.innerHTML = "";
+  products.forEach((p, index) => {
+    const div = document.createElement("div");
+    div.className = "product";
+    div.innerHTML = `
+      <img src="${p.img}" alt="${p.title}" />
+      <h3>${p.title}</h3>
+      <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
+      ${
+        p.price == 0 && p.link
+          ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
+          : `<button onclick="addToCart(${index})">Ajouter au panier</button>`
+      }
+    `;
+    container.appendChild(div);
+  });
+}
+
 function setCategory(c) {
   renderProducts(c);
 }
@@ -106,6 +126,20 @@ function sendOrder() {
   window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
 }
 
+// Filtrage dynamique
+document.getElementById("category-filter").addEventListener("change", e => {
+  renderProducts(e.target.value);
+});
+
+document.getElementById("search-bar").addEventListener("input", e => {
+  const q = e.target.value.toLowerCase();
+  const filtered = allProducts.filter(p =>
+    p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+  );
+  renderFilteredProducts(filtered);
+});
+
+// Chargement des produits depuis Firestore
 window.onload = () => {
   db.collection("products").orderBy("title").onSnapshot(snapshot => {
     allProducts = [];
