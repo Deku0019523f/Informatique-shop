@@ -1,0 +1,158 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+  <title>Informatique Shop - Accueil</title>
+  <style>
+    body {
+      font-family: 'Segoe UI', sans-serif;
+      margin: 0;
+      background: #f9f9f9;
+      color: #333;
+    }
+
+    header {
+      background: linear-gradient(120deg, #007bff, #00bcd4);
+      color: white;
+      text-align: center;
+      padding: 60px 20px;
+      animation: fadeIn 1.2s ease-out;
+    }
+
+    header h1 {
+      font-size: 2.5rem;
+      margin-bottom: 10px;
+    }
+
+    header p {
+      font-size: 1.2rem;
+      margin-top: 0;
+    }
+
+    nav {
+      background: #fff;
+      padding: 10px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      text-align: center;
+    }
+
+    nav a {
+      margin: 0 15px;
+      color: #007bff;
+      text-decoration: none;
+      font-weight: bold;
+    }
+
+    section {
+      max-width: 900px;
+      margin: auto;
+      padding: 40px 20px;
+      animation: fadeInUp 0.8s ease forwards;
+    }
+
+    section h2 {
+      color: #007bff;
+      margin-bottom: 10px;
+    }
+
+    .cta {
+      text-align: center;
+      margin-top: 30px;
+    }
+
+    .cta a {
+      background: #007bff;
+      color: white;
+      padding: 12px 25px;
+      border-radius: 5px;
+      text-decoration: none;
+      font-weight: bold;
+      transition: background 0.3s ease;
+    }
+
+    .cta a:hover {
+      background: #0056b3;
+    }
+
+    ul {
+      line-height: 1.8;
+    }
+
+    footer {
+      background: #222;
+      color: white;
+      text-align: center;
+      padding: 20px;
+      margin-top: 50px;
+    }
+
+    /* ANIMATIONS */
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(-20px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    @keyframes fadeInUp {
+      from { opacity: 0; transform: translateY(30px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+
+    /* Responsive */
+    @media (max-width: 600px) {
+      header h1 { font-size: 2rem; }
+      header p { font-size: 1rem; }
+    }
+  </style>
+</head>
+<body>
+
+<header>
+  <h1>Informatique Shop</h1>
+  <p>Boostez votre présence numérique avec nos outils et services en ligne</p>
+</header>
+
+<nav>
+  <a href="index.html">Produits</a>
+  <a href="reviews.html">Avis</a>
+  <a href="contact.html">Contact</a>
+</nav>
+
+<section>
+  <h2>Notre mission</h2>
+  <p>
+    Nous fournissons des solutions numériques accessibles à tous : abonnements, outils, formations et automatisation. 
+    Nos produits sont testés, utiles et livrés instantanément.
+  </p>
+</section>
+
+<section>
+  <h2>Ce que nous proposons</h2>
+  <ul>
+    <li><strong>Abonnements pas chers :</strong> Netflix, TikTok Monétisé, etc.</li>
+    <li><strong>Automatisation :</strong> Bots WhatsApp, scripts phishing (à but éducatif)</li>
+    <li><strong>Boost réseau :</strong> Abonnés Instagram, TikTok, YouTube</li>
+    <li><strong>Formations gratuites :</strong> Scripts, piratage éthique, WiFi, termux</li>
+    <li><strong>Forfaits internet CI :</strong> Orange jusqu’à 100Go à prix cassés</li>
+  </ul>
+  <div class="cta">
+    <a href="index.html">Découvrir les produits</a>
+  </div>
+</section>
+
+<section>
+  <h2>Ils nous font confiance</h2>
+  <p>Des centaines de clients satisfaits chaque mois. Consultez leurs <a href="reviews.html">avis</a> et rejoignez la communauté.</p>
+</section>
+
+<section>
+  <h2>Une question ?</h2>
+  <p>Écrivez-nous facilement via WhatsApp ou notre <a href="contact.html">formulaire de contact</a>. Nous répondons rapidement.</p>
+</section>
+
+<footer>
+  © 2025 Informatique Shop — Tous droits réservés
+</footer>
+
+</body>
+</html>

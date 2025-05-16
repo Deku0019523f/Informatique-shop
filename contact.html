@@ -1,0 +1,76 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8">
+  <title>Contact - Informatique Shop</title>
+  <style>
+    body { font-family: Arial; background: #f9f9f9; padding: 30px; }
+    .contact-box {
+      max-width: 600px;
+      margin: auto;
+      background: white;
+      padding: 30px;
+      border-radius: 10px;
+      box-shadow: 0 0 10px rgba(0,0,0,0.1);
+    }
+    input, textarea {
+      width: 100%;
+      padding: 10px;
+      margin-top: 10px;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    button {
+      margin-top: 15px;
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 20px;
+      border-radius: 5px;
+      cursor: pointer;
+    }
+    .link {
+      margin-top: 20px;
+      text-align: center;
+    }
+    .link a {
+      color: #007bff;
+      text-decoration: none;
+    }
+  </style>
+</head>
+<body>
+
+<div class="contact-box">
+  <h2>Contactez-nous</h2>
+  <form onsubmit="sendMessage(); return false;">
+    <input type="text" id="contact-name" placeholder="Votre nom" required />
+    <input type="email" id="contact-email" placeholder="Votre e-mail" required />
+    <textarea id="contact-message" placeholder="Votre message" rows="5" required></textarea>
+    <button type="submit">Envoyer via WhatsApp</button>
+  </form>
+
+  <div class="link">
+    <p>Vous pouvez aussi nous écrire directement :</p>
+    <a href="https://wa.me/2250575719113" target="_blank">WhatsApp : 0575719113</a>
+  </div>
+</div>
+
+<script>
+function sendMessage() {
+  const name = document.getElementById("contact-name").value.trim();
+  const email = document.getElementById("contact-email").value.trim();
+  const message = document.getElementById("contact-message").value.trim();
+
+  if (!name || !email || !message) {
+    alert("Veuillez remplir tous les champs.");
+    return;
+  }
+
+  const text = `*Nouveau message depuis le site :*%0ANom : ${name}%0AEmail : ${email}%0AMessage : ${message}`;
+  window.open(`https://wa.me/2250575719113?text=${encodeURI(text)}`);
+}
+</script>
+
+</body>
+</html>
