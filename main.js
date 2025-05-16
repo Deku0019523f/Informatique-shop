@@ -1,130 +1,118 @@
-let cart = JSON.parse(localStorage.getItem("cart")) || [];
-let currentCategory = "All";
+// Initialiser Firebase si pas déjà fait
+if (!firebase.apps.length) {
+  firebase.initializeApp({
+    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
+    authDomain: "informatique-shop-53a25.firebaseapp.com",
+    projectId: "informatique-shop-53a25",
+  });
+}
 
-function renderProducts() {
+const db = firebase.firestore();
+let cart = [];
+let allProducts = [];
+
+function renderProducts(category = "All") {
   const container = document.getElementById("product-list");
   container.innerHTML = "";
 
-  const filtered = currentCategory === "All"
-    ? products
-    : products.filter(p => p.category === currentCategory);
+  let products = category === "All"
+    ? allProducts
+    : allProducts.filter(p => p.category === category);
 
-  filtered.forEach(p => {
+  products.forEach((p, index) => {
     const div = document.createElement("div");
     div.className = "product";
     div.innerHTML = `
-      <img src="${p.img}" alt="${p.title}">
+      <img src="${p.img}" alt="${p.title}" />
       <h3>${p.title}</h3>
-      <p>Prix : ${p.price === 0 ? "Gratuit" : p.price + " FCFA"}</p>
-      ${p.price === 0 && p.link
-        ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-        : `<button onclick="addToCart('${p.title}', ${p.price})">Ajouter au panier</button>`}
+      <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
+      ${
+        p.price == 0 && p.link
+          ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
+          : `<button onclick="addToCart(${index})">Ajouter au panier</button>`
+      }
     `;
     container.appendChild(div);
   });
 }
 
-function setCategory(cat) {
-  currentCategory = cat;
-  renderProducts();
+function setCategory(c) {
+  renderProducts(c);
 }
 
-function addToCart(name, price) {
-  const existing = cart.find(item => item.name === name);
-  if (existing) {
-    existing.qty++;
+function addToCart(index) {
+  const p = allProducts[index];
+  const found = cart.find(i => i.title === p.title);
+  if (found) {
+    found.qty++;
   } else {
-    cart.push({ name, price, qty: 1 });
+    cart.push({ title: p.title, qty: 1, price: p.price });
   }
-  localStorage.setItem("cart", JSON.stringify(cart));
   updateCart();
-  showToast("Ajouté au panier !");
 }
 
 function updateCart() {
-  const items = document.getElementById("cart-items");
-  const total = document.getElementById("cart-total");
-  const orderBtn = document.getElementById("order-btn");
-  const summaryCount = document.getElementById("cart-count");
-  const summaryTotal = document.getElementById("cart-sum");
-  let sum = 0;
+  const list = document.getElementById("cart-items");
+  const summary = document.getElementById("cart-summary");
+  const count = document.getElementById("cart-count");
+  const sum = document.getElementById("cart-sum");
 
-  items.innerHTML = "";
-  if (cart.length === 0) {
-    items.textContent = "Aucun produit pour le moment.";
-    total.textContent = "";
-    orderBtn.style.display = "none";
-    summaryCount.textContent = "0";
-    summaryTotal.textContent = "0 FCFA";
-    return;
-  }
+  list.innerHTML = "";
+  let total = 0;
 
-  cart.forEach(item => {
-    const line = document.createElement("div");
-    line.className = "cart-item";
-    line.innerHTML = `
-      ${item.name}
-      <input type="number" min="1" value="${item.qty}" onchange="updateQty('${item.name}', this.value)">
-      = ${item.qty * item.price} FCFA
-      <button onclick="removeFromCart('${item.name}')">X</button>
+  cart.forEach((item, i) => {
+    const row = document.createElement("div");
+    row.innerHTML = `
+      ${item.title} x${item.qty} = ${item.qty * item.price} FCFA
+      <input type="number" value="${item.qty}" onchange="changeQty(${i}, this.value)">
+      <button onclick="removeFromCart(${i})">Supprimer</button>
     `;
-    items.appendChild(line);
-    sum += item.qty * item.price;
+    list.appendChild(row);
+    total += item.qty * item.price;
   });
 
-  total.textContent = `Total : ${sum} FCFA`;
-  summaryCount.textContent = cart.reduce((a, i) => a + i.qty, 0);
-  summaryTotal.textContent = sum + " FCFA";
-  orderBtn.style.display = "block";
+  document.getElementById("cart-total").textContent = "Total : " + total + " FCFA";
+  document.getElementById("order-btn").style.display = cart.length ? "inline-block" : "none";
+  count.textContent = cart.length;
+  sum.textContent = total + " FCFA";
 }
 
-function removeFromCart(name) {
-  cart = cart.filter(i => i.name !== name);
-  localStorage.setItem("cart", JSON.stringify(cart));
+function changeQty(i, qty) {
+  cart[i].qty = parseInt(qty);
   updateCart();
-  showToast("Produit supprimé.");
 }
 
-function updateQty(name, qty) {
-  const item = cart.find(i => i.name === name);
-  if (item) item.qty = parseInt(qty) || 1;
-  localStorage.setItem("cart", JSON.stringify(cart));
+function removeFromCart(i) {
+  cart.splice(i, 1);
   updateCart();
 }
 
 function clearCart() {
   cart = [];
-  localStorage.removeItem("cart");
   updateCart();
-  showToast("Panier vidé.");
 }
 
 function sendOrder() {
   const name = document.getElementById("client-name").value.trim();
   const payment = document.getElementById("payment-method").value;
-  if (!name || !payment || cart.length === 0) {
-    showToast("Remplissez toutes les informations.");
-    return;
-  }
-
-  if (!confirm("Envoyer cette commande sur WhatsApp ?")) return;
-
+  if (!name || !payment) return alert("Remplissez votre nom et méthode de paiement.");
   let msg = `*Nouvelle commande :*%0A`;
   let total = 0;
   cart.forEach(i => {
-    msg += `- ${i.name} x${i.qty} = ${i.qty * i.price} FCFA%0A`;
+    msg += `- ${i.title} x${i.qty} = ${i.qty * i.price} FCFA%0A`;
     total += i.qty * i.price;
   });
   msg += `Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}`;
   window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
 }
 
-function showToast(msg) {
-  const toast = document.getElementById("toast");
-  toast.innerText = msg;
-  toast.style.display = "block";
-  setTimeout(() => toast.style.display = "none", 2000);
-}
-
-renderProducts();
-updateCart();
+window.onload = () => {
+  db.collection("products").orderBy("title").onSnapshot(snapshot => {
+    allProducts = [];
+    snapshot.forEach(doc => {
+      allProducts.push(doc.data());
+    });
+    renderProducts();
+    updateCart();
+  });
+};
