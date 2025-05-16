@@ -11,7 +11,6 @@
       background: #f9f9f9;
       color: #333;
     }
-
     header {
       background: linear-gradient(120deg, #007bff, #00bcd4);
       color: white;
@@ -19,48 +18,34 @@
       padding: 60px 20px;
       animation: fadeIn 1.2s ease-out;
     }
-
-    header h1 {
-      font-size: 2.5rem;
-      margin-bottom: 10px;
-    }
-
-    header p {
-      font-size: 1.2rem;
-      margin-top: 0;
-    }
-
+    header h1 { font-size: 2.5rem; margin-bottom: 10px; }
+    header p { font-size: 1.2rem; margin-top: 0; }
     nav {
       background: #fff;
       padding: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       text-align: center;
     }
-
     nav a {
       margin: 0 15px;
       color: #007bff;
       text-decoration: none;
       font-weight: bold;
     }
-
     section {
       max-width: 900px;
       margin: auto;
       padding: 40px 20px;
       animation: fadeInUp 0.8s ease forwards;
     }
-
     section h2 {
       color: #007bff;
       margin-bottom: 10px;
     }
-
     .cta {
       text-align: center;
       margin-top: 30px;
     }
-
     .cta a {
       background: #007bff;
       color: white;
@@ -70,15 +55,8 @@
       font-weight: bold;
       transition: background 0.3s ease;
     }
-
-    .cta a:hover {
-      background: #0056b3;
-    }
-
-    ul {
-      line-height: 1.8;
-    }
-
+    .cta a:hover { background: #0056b3; }
+    ul { line-height: 1.8; }
     footer {
       background: #222;
       color: white;
@@ -86,19 +64,14 @@
       padding: 20px;
       margin-top: 50px;
     }
-
-    /* ANIMATIONS */
     @keyframes fadeIn {
       from { opacity: 0; transform: translateY(-20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
     @keyframes fadeInUp {
       from { opacity: 0; transform: translateY(30px); }
       to { opacity: 1; transform: translateY(0); }
     }
-
-    /* Responsive */
     @media (max-width: 600px) {
       header h1 { font-size: 2rem; }
       header p { font-size: 1rem; }
@@ -113,7 +86,8 @@
 </header>
 
 <nav>
-  <a href="index.html">Produits</a>
+  <a href="index.html">Accueil</a>
+  <a href="boutique.html">Produits</a>
   <a href="reviews.html">Avis</a>
   <a href="contact.html">Contact</a>
 </nav>
@@ -136,7 +110,7 @@
     <li><strong>Forfaits internet CI :</strong> Orange jusqu’à 100Go à prix cassés</li>
   </ul>
   <div class="cta">
-    <a href="index.html">Découvrir les produits</a>
+    <a href="boutique.html">Voir les produits</a>
   </div>
 </section>
 
