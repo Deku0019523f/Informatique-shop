@@ -43,6 +43,13 @@
 </head>
 <body>
 
+<!-- Tous les avis visibles publiquement -->
+<div class="box" id="all-reviews">
+  <h2>Tous les avis clients</h2>
+  <div id="public-reviews">Chargement...</div>
+</div>
+
+<!-- Connexion utilisateur -->
 <div class="box" id="login-box">
   <h2>Connexion</h2>
   <input type="email" id="login-email" placeholder="Email" />
@@ -52,6 +59,7 @@
   <p id="login-error" style="color:red;"></p>
 </div>
 
+<!-- Laisser un avis ou modifier le sien -->
 <div class="box" id="review-box" style="display:none;">
   <h2>Laisser ou modifier votre avis</h2>
   <form id="review-form">
@@ -72,6 +80,7 @@
   </form>
 </div>
 
+<!-- Avis perso -->
 <div class="box" id="my-reviews" style="display:none;">
   <h2>Vos avis</h2>
   <div id="review-list">Chargement...</div>
@@ -101,6 +110,7 @@
   const reviewBox = document.getElementById('review-box');
   const reviewList = document.getElementById('review-list');
   const myReviews = document.getElementById('my-reviews');
+  const publicReviews = document.getElementById('public-reviews');
   const reviewForm = document.getElementById('review-form');
 
   const reviewIdInput = document.getElementById('review-id');
@@ -108,6 +118,28 @@
   const emailInput = document.getElementById('review-email');
   const messageInput = document.getElementById('review-message');
   const ratingInput = document.getElementById('review-rating');
+
+  function loadAllReviews() {
+    publicReviews.innerHTML = "Chargement...";
+    db.collection("reviews").orderBy("timestamp", "desc").onSnapshot(snapshot => {
+      publicReviews.innerHTML = "";
+      snapshot.forEach(doc => {
+        const r = doc.data();
+        const stars = "★".repeat(r.rating || 0) + "☆".repeat(5 - (r.rating || 0));
+        const div = document.createElement("div");
+        div.className = "review-entry";
+        div.innerHTML = `
+          <div class="stars">${stars}</div>
+          <strong>${r.name}</strong><br>
+          <p>${r.message}</p>
+        `;
+        publicReviews.appendChild(div);
+      });
+      if (snapshot.empty) publicReviews.innerHTML = "Aucun avis pour le moment.";
+    });
+  }
+
+  loadAllReviews();
 
   auth.onAuthStateChanged(user => {
     if (user) {
@@ -188,7 +220,7 @@
           `;
           reviewList.appendChild(div);
         });
-        if (snapshot.empty) reviewList.innerHTML = "Aucun avis pour le moment.";
+        if (snapshot.empty) reviewList.innerHTML = "Vous n'avez encore posté aucun avis.";
       });
   }
 
