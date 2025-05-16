@@ -91,12 +91,15 @@
         </select>
         <input type="text" id="img" placeholder="URL image (ex: images/nom.jpg)" required />
         <input type="text" id="link" placeholder="Lien de téléchargement (optionnel)" />
+        <!-- Champs pour promo -->
+        <input type="number" id="discount-price" placeholder="Prix promotionnel (optionnel)" />
+        <input type="datetime-local" id="discount-until" placeholder="Date/heure de fin promo (optionnel)" />
         <button type="submit">Ajouter / Modifier produit</button>
       </form>
 
       <table id="products-table">
         <thead>
-          <tr><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Actions</th></tr>
+          <tr><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Promo</th><th>Actions</th></tr>
         </thead>
         <tbody></tbody>
       </table>
@@ -160,6 +163,8 @@
     const categoryInput = document.getElementById('category');
     const imgInput = document.getElementById('img');
     const linkInput = document.getElementById('link');
+    const discountPriceInput = document.getElementById('discount-price');
+    const discountUntilInput = document.getElementById('discount-until');
 
     // Auth State
     auth.onAuthStateChanged(user => {
@@ -194,7 +199,7 @@
 
     // Load products from Firestore
     function loadProducts() {
-      productsTableBody.innerHTML = '<tr><td colspan="4">Chargement...</td></tr>';
+      productsTableBody.innerHTML = '<tr><td colspan="5">Chargement...</td></tr>';
       db.collection('products').orderBy('title').onSnapshot(snapshot => {
         productsTableBody.innerHTML = '';
         snapshot.forEach(doc => {
@@ -204,6 +209,10 @@
             <td>${p.title}</td>
             <td>${p.price} FCFA</td>
             <td>${p.category}</td>
+            <td>
+              ${p.discountPrice ? p.discountPrice + " FCFA" : "-"}
+              ${p.discountUntil ? `<br><small>Jusqu'au ${new Date(p.discountUntil.seconds * 1000).toLocaleString()}</small>` : ''}
+            </td>
             <td>
               <button onclick="editProduct('${doc.id}')">Modifier</button>
               <button onclick="deleteProduct('${doc.id}')">Supprimer</button>
@@ -218,17 +227,27 @@
     productForm.addEventListener('submit', e => {
       e.preventDefault();
       const id = productIdInput.value;
+
+      const discountVal = discountPriceInput.value;
+      const discountUntilVal = discountUntilInput.value;
+
       const data = {
         title: titleInput.value.trim(),
         price: Number(priceInput.value),
         category: categoryInput.value,
         img: imgInput.value.trim(),
-        link: linkInput.value.trim()
+        link: linkInput.value.trim(),
+        discountPrice: discountVal ? Number(discountVal) : null,
+        discountUntil: discountUntilVal
+          ? firebase.firestore.Timestamp.fromDate(new Date(discountUntilVal))
+          : null
       };
+
       if (!data.title || !data.category || !data.img || isNaN(data.price)) {
         alert('Veuillez remplir correctement tous les champs obligatoires.');
         return;
       }
+
       if (id) {
         db.collection('products').doc(id).update(data)
           .then(() => {
@@ -257,7 +276,11 @@
           categoryInput.value = p.category;
           imgInput.value = p.img;
           linkInput.value = p.link || '';
-          window.scrollTo({top: 0, behavior: 'smooth'});
+          discountPriceInput.value = p.discountPrice || '';
+          discountUntilInput.value = p.discountUntil
+            ? new Date(p.discountUntil.seconds * 1000).toISOString().slice(0,16)
+            : '';
+          window.scrollTo({top:0, behavior:'smooth'});
         }
       });
     }
@@ -270,50 +293,11 @@
       }
     }
 
+    // Load orders
     function loadOrders() {
+      ordersTableBody.innerHTML = '<tr><td colspan="5">Chargement...</td></tr>';
       db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
         ordersTableBody.innerHTML = '';
         snapshot.forEach(doc => {
           const o = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${o.name}</td>
-            <td>${o.items}</td>
-            <td>${o.total} FCFA</td>
-            <td>${o.payment}</td>
-            <td>${o.timestamp?.toDate().toLocaleString() || ''}</td>
-          `;
-          ordersTableBody.appendChild(tr);
-        });
-      });
-    }
-
-    function loadReviews() {
-      db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-        reviewsTableBody.innerHTML = '';
-        snapshot.forEach(doc => {
-          const r = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${r.name}</td>
-            <td>${r.email}</td>
-            <td>${r.message}</td>
-            <td>${r.rating || ''}</td>
-            <td><button onclick="deleteReview('${doc.id}')">Supprimer</button></td>
-          `;
-          reviewsTableBody.appendChild(tr);
-        });
-      });
-    }
-
-    function deleteReview(id) {
-      if (confirm('Supprimer cet avis ?')) {
-        db.collection('reviews').doc(id).delete()
-          .then(() => alert('Avis supprimé.'))
-          .catch(e => alert('Erreur : ' + e.message));
-      }
-    }
-  </script>
-
-</body>
-</html>
+          const tr = document.createElement
