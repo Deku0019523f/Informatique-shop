@@ -3,12 +3,13 @@
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
-  <title>Informatique Shop - Boutique</title>
+  <title>Boutique - Informatique Shop</title>
   <style>
     body {
       font-family: Arial, sans-serif;
       background: #f4f4f4;
-      margin: 0; padding: 0;
+      margin: 0;
+      padding: 0;
       color: #333;
     }
     header {
@@ -20,24 +21,18 @@
     header h1 {
       margin: 0;
       font-size: 2.5rem;
-      animation: fadeIn 1s ease forwards;
     }
     nav {
       background: #fff;
       padding: 10px;
-      box-shadow: 0 0 5px rgba(0,0,0,0.1);
       text-align: center;
-      animation: fadeIn 1.2s ease forwards;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
     }
     nav a {
       margin: 0 15px;
       color: #007bff;
       font-weight: bold;
       text-decoration: none;
-      transition: color 0.3s ease;
-    }
-    nav a:hover {
-      color: #0056b3;
     }
     #cart-summary {
       position: fixed;
@@ -48,30 +43,12 @@
       padding: 10px 15px;
       border-radius: 8px;
       z-index: 1000;
-      animation: fadeIn 1.4s ease forwards;
     }
     main {
       max-width: 900px;
       margin: 100px auto 40px;
       padding: 0 15px;
-      animation: fadeInUp 1s ease forwards;
     }
-    /* Animations */
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
-    @keyframes fadeIn {
-      from { opacity: 0; }
-      to { opacity: 1; }
-    }
-    .fade-in {
-      animation: fadeIn 0.8s ease forwards;
-    }
-    .fade-up {
-      animation: fadeInUp 0.8s ease forwards;
-    }
-    /* Style produits */
     .product {
       background: white;
       padding: 15px;
@@ -103,14 +80,12 @@
     button:hover {
       background: #0056b3;
     }
-    /* Panier */
     #cart {
       background: white;
       padding: 15px;
       border-radius: 8px;
       margin-bottom: 30px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      animation: fadeUp 0.8s ease forwards;
     }
     #cart input[type=number] {
       width: 60px;
@@ -118,13 +93,6 @@
       margin-left: 10px;
       border-radius: 4px;
       border: 1px solid #ccc;
-    }
-    #cart button {
-      margin-left: 10px;
-      background: #dc3545;
-    }
-    #cart button:hover {
-      background: #a71d2a;
     }
     input, select {
       padding: 8px;
@@ -134,6 +102,10 @@
       display: block;
       border-radius: 5px;
       border: 1px solid #ccc;
+    }
+    .filters {
+      text-align: center;
+      margin: 20px 0;
     }
   </style>
 </head>
@@ -149,14 +121,15 @@
   </nav>
 </header>
 
-<div id="cart-summary" class="fade-in">
+<div id="cart-summary">
   Articles : <span id="cart-count">0</span> | Total : <span id="cart-sum">0 FCFA</span>
 </div>
 
-<main class="fade-up">
+<main>
 
-  <div style="text-align:center;margin:20px;" class="fade-up">
-    <select onchange="setCategory(this.value)">
+  <div class="filters">
+    <input type="text" id="search-bar" placeholder="Rechercher un produit..." />
+    <select id="category-filter">
       <option value="All">Toutes les catégories</option>
       <option value="FREE">Gratuit</option>
       <option value="Abonnement">Abonnement</option>
@@ -164,7 +137,7 @@
     </select>
   </div>
 
-  <section id="cart" class="fade-up">
+  <section id="cart">
     <h3>Panier</h3>
     <div id="cart-items">Aucun produit pour le moment.</div>
     <div id="cart-total" style="font-weight:bold; margin-top:10px;"></div>
@@ -180,24 +153,14 @@
     <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
   </section>
 
-  <section id="product-list" class="fade-up"></section>
+  <section id="product-list"></section>
 
 </main>
 
-<div id="toast"></div>
-
-<script src="products.js"></script>
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="main.js"></script>
-
-<script>
-  // Ajoute fade-up aux produits affichés (animation)
-  const origRenderProducts = renderProducts;
-  renderProducts = function() {
-    origRenderProducts();
-    const productsEls = document.querySelectorAll("#product-list .product");
-    productsEls.forEach(el => el.classList.add("fade-up"));
-  };
-</script>
 
 </body>
 </html>
