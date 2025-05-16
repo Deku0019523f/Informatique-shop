@@ -1,4 +1,3 @@
-// Initialiser Firebase
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
@@ -8,34 +7,29 @@ if (!firebase.apps.length) {
 }
 
 const db = firebase.firestore();
-let cart = [];
 let allProducts = [];
 
-// Affichage groupé par catégorie
-function renderProducts(category = "All") {
+const categories = ["Abonnement", "Logiciel", "FREE"];
+
+function renderAllProducts(search = "", filterCat = "All") {
   const container = document.getElementById("product-list");
   container.innerHTML = "";
 
-  const categories = ["Abonnement", "Logiciel", "FREE"];
-  const grouped = {};
+  const lowerSearch = search.toLowerCase();
 
-  // Filtrer les produits si une catégorie est sélectionnée
-  let filtered = category === "All"
-    ? allProducts
-    : allProducts.filter(p => p.category === category);
+  categories.forEach(cat => {
+    if (filterCat !== "All" && filterCat !== cat) return;
 
-  // Regrouper par catégorie
-  filtered.forEach(p => {
-    if (!grouped[p.category]) grouped[p.category] = [];
-    grouped[p.category].push(p);
-  });
+    const sectionProducts = allProducts.filter(p =>
+      p.category === cat &&
+      (p.title.toLowerCase().includes(lowerSearch) || p.category.toLowerCase().includes(lowerSearch))
+    );
 
-  // Affichage par section
-  for (let cat of categories) {
-    if (grouped[cat]) {
+    if (sectionProducts.length) {
       const section = document.createElement("div");
       section.innerHTML = `<h2 style="color:#007bff">${cat}</h2>`;
-      grouped[cat].forEach(p => {
+
+      sectionProducts.forEach(p => {
         const div = document.createElement("div");
         div.className = "product";
         div.innerHTML = `
@@ -50,12 +44,15 @@ function renderProducts(category = "All") {
         `;
         section.appendChild(div);
       });
+
       container.appendChild(section);
     }
-  }
+  });
 }
 
-// Ajouter au panier par nom (utile si index non fixe)
+// Panier
+let cart = [];
+
 function addToCartByTitle(title) {
   const p = allProducts.find(i => i.title === title);
   if (!p) return;
@@ -68,7 +65,6 @@ function addToCartByTitle(title) {
   updateCart();
 }
 
-// Gestion panier
 function updateCart() {
   const list = document.getElementById("cart-items");
   const count = document.getElementById("cart-count");
@@ -124,60 +120,27 @@ function sendOrder() {
   window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
 }
 
-// Recherche dynamique
-document.getElementById("search-bar").addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  const results = allProducts.filter(p =>
-    p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-  );
-  renderFilteredProducts(results);
+// Événements recherche et filtre
+document.getElementById("search-bar").addEventListener("input", () => {
+  const q = document.getElementById("search-bar").value;
+  const c = document.getElementById("category-filter").value;
+  renderAllProducts(q, c);
 });
 
-function renderFilteredProducts(products) {
-  const container = document.getElementById("product-list");
-  container.innerHTML = "";
-
-  const grouped = {};
-  products.forEach(p => {
-    if (!grouped[p.category]) grouped[p.category] = [];
-    grouped[p.category].push(p);
-  });
-
-  for (let cat in grouped) {
-    const section = document.createElement("div");
-    section.innerHTML = `<h2 style="color:#007bff">${cat}</h2>`;
-    grouped[cat].forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product";
-      div.innerHTML = `
-        <img src="${p.img}" alt="${p.title}" />
-        <h3>${p.title}</h3>
-        <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
-        ${
-          p.price == 0 && p.link
-            ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-            : `<button onclick="addToCartByTitle('${p.title}')">Ajouter au panier</button>`
-        }
-      `;
-      section.appendChild(div);
-    });
-    container.appendChild(section);
-  }
-}
-
-// Filtrage par catégorie
-document.getElementById("category-filter").addEventListener("change", e => {
-  renderProducts(e.target.value);
+document.getElementById("category-filter").addEventListener("change", () => {
+  const q = document.getElementById("search-bar").value;
+  const c = document.getElementById("category-filter").value;
+  renderAllProducts(q, c);
 });
 
-// Chargement des produits Firebase
+// Chargement Firestore
 window.onload = () => {
   db.collection("products").orderBy("title").onSnapshot(snapshot => {
     allProducts = [];
     snapshot.forEach(doc => {
       allProducts.push(doc.data());
     });
-    renderProducts();
+    renderAllProducts();
     updateCart();
   });
 };
