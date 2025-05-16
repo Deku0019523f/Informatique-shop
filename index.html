@@ -27,6 +27,15 @@
 <div id="cart-summary">Articles : <span id="cart-count">0</span> | Total : <span id="cart-sum">0 FCFA</span></div>
 
 <main>
+  <div style="text-align:center;margin:20px;">
+    <select onchange="setCategory(this.value)">
+      <option value="All">Toutes les catégories</option>
+      <option value="FREE">Gratuit</option>
+      <option value="Abonnement">Abonnement</option>
+      <option value="Logiciel">Logiciel</option>
+    </select>
+  </div>
+
   <section id="cart">
     <h3>Panier</h3>
     <div id="cart-items">Aucun produit pour le moment.</div>
