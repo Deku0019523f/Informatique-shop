@@ -257,4 +257,63 @@
           categoryInput.value = p.category;
           imgInput.value = p.img;
           linkInput.value = p.link || '';
-          window.scrollTo({top:0
+          window.scrollTo({top: 0, behavior: 'smooth'});
+        }
+      });
+    }
+
+    function deleteProduct(id) {
+      if (confirm('Supprimer ce produit ?')) {
+        db.collection('products').doc(id).delete()
+          .then(() => alert('Produit supprimé.'))
+          .catch(e => alert('Erreur : ' + e.message));
+      }
+    }
+
+    function loadOrders() {
+      db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        ordersTableBody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const o = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${o.name}</td>
+            <td>${o.items}</td>
+            <td>${o.total} FCFA</td>
+            <td>${o.payment}</td>
+            <td>${o.timestamp?.toDate().toLocaleString() || ''}</td>
+          `;
+          ordersTableBody.appendChild(tr);
+        });
+      });
+    }
+
+    function loadReviews() {
+      db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+        reviewsTableBody.innerHTML = '';
+        snapshot.forEach(doc => {
+          const r = doc.data();
+          const tr = document.createElement('tr');
+          tr.innerHTML = `
+            <td>${r.name}</td>
+            <td>${r.email}</td>
+            <td>${r.message}</td>
+            <td>${r.rating || ''}</td>
+            <td><button onclick="deleteReview('${doc.id}')">Supprimer</button></td>
+          `;
+          reviewsTableBody.appendChild(tr);
+        });
+      });
+    }
+
+    function deleteReview(id) {
+      if (confirm('Supprimer cet avis ?')) {
+        db.collection('reviews').doc(id).delete()
+          .then(() => alert('Avis supprimé.'))
+          .catch(e => alert('Erreur : ' + e.message));
+      }
+    }
+  </script>
+
+</body>
+</html>
