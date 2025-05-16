@@ -8,6 +8,7 @@ if (!firebase.apps.length) {
 
 const db = firebase.firestore();
 let allProducts = [];
+let cart = [];
 
 const categories = ["Abonnement", "Logiciel", "FREE"];
 
@@ -32,15 +33,59 @@ function renderAllProducts(search = "", filterCat = "All") {
       sectionProducts.forEach(p => {
         const div = document.createElement("div");
         div.className = "product";
+
+        const now = new Date();
+        let prixHTML = `<p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>`;
+        let bouton = "";
+
+        // Vérifie promo active
+        const nowMs = now.getTime();
+        let discountActive = p.discountPrice && p.discountUntil?.seconds * 1000 > nowMs;
+
+        if (discountActive) {
+          prixHTML = `
+            <p>
+              <span style="text-decoration:line-through; color:gray;">${p.price} FCFA</span>
+              <span style="color:red; font-weight:bold;">${p.discountPrice} FCFA</span><br>
+              <small id="timer-${p.title.replace(/\s/g, "")}"></small>
+            </p>`;
+          setCountdown(`timer-${p.title.replace(/\s/g, "")}`, p.discountUntil.seconds * 1000);
+        }
+
+        if (p.price == 0 && p.link) {
+          bouton = `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`;
+        } else {
+          bouton = `<button onclick="addToCartByTitle('${p.title}')">Ajouter au panier</button>`;
+        }
+
+        // Calcul % réduction
+        let discountPercent = 0;
+        if (discountActive) {
+          discountPercent = Math.round(100 - (p.discountPrice / p.price) * 100);
+        }
+
         div.innerHTML = `
-          <img src="${p.img}" alt="${p.title}" />
+          <div style="position:relative; display:inline-block;">
+            <img src="${p.img}" alt="${p.title}" />
+            ${
+              discountPercent > 0
+                ? `<div style="
+                    position:absolute;
+                    top:5px; left:5px;
+                    background:red;
+                    color:white;
+                    padding: 3px 7px;
+                    font-weight:bold;
+                    font-size:14px;
+                    border-radius: 3px;
+                    z-index:10;
+                  ">-${discountPercent}%</div>`
+                : ''
+            }
+          </div>
           <h3>${p.title}</h3>
-          <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
-          ${
-            p.price == 0 && p.link
-              ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-              : `<button onclick="addToCartByTitle('${p.title}')">Ajouter au panier</button>`
-          }
+          ${prixHTML}
+          ${bouton}
         `;
         section.appendChild(div);
       });
@@ -50,17 +95,42 @@ function renderAllProducts(search = "", filterCat = "All") {
   });
 }
 
-// Panier
-let cart = [];
+function setCountdown(id, endTime) {
+  const el = document.getElementById(id);
+  if (!el) return;
+
+  function update() {
+    const now = new Date().getTime();
+    const diff = endTime - now;
+
+    if (diff <= 0) {
+      el.innerText = "Offre expirée";
+      return;
+    }
+
+    const h = Math.floor(diff / (1000 * 60 * 60));
+    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
+    const s = Math.floor((diff % (1000 * 60)) / 1000);
+    el.innerText = `Expire dans ${h}h ${m}m ${s}s`;
+    setTimeout(update, 1000);
+  }
+
+  update();
+}
 
 function addToCartByTitle(title) {
   const p = allProducts.find(i => i.title === title);
   if (!p) return;
+
+  const nowMs = Date.now();
+  const discountActive = p.discountPrice && p.discountUntil?.seconds * 1000 > nowMs;
+  const price = discountActive ? p.discountPrice : p.price;
+
   const found = cart.find(i => i.title === p.title);
   if (found) {
     found.qty++;
   } else {
-    cart.push({ title: p.title, qty: 1, price: p.price });
+    cart.push({ title: p.title, qty: 1, price });
   }
   updateCart();
 }
@@ -120,7 +190,6 @@ function sendOrder() {
   window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
 }
 
-// Événements recherche et filtre
 document.getElementById("search-bar").addEventListener("input", () => {
   const q = document.getElementById("search-bar").value;
   const c = document.getElementById("category-filter").value;
@@ -133,7 +202,6 @@ document.getElementById("category-filter").addEventListener("change", () => {
   renderAllProducts(q, c);
 });
 
-// Chargement Firestore
 window.onload = () => {
   db.collection("products").orderBy("title").onSnapshot(snapshot => {
     allProducts = [];
