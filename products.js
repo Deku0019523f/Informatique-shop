@@ -21,6 +21,13 @@ const products = [
     img: "images/script-host-fonctionnel.jpg",
     link: "https://t.me/+4Q7VehxNaOk0YjU0"
   },
+  {
+  "title": "Cinéma apk",
+  "price": 0,
+  "category": "FREE",
+  "img": "images/cinéma.jpg",
+  "link": "https://t.me/+4Q7VehxNaOk0YjU0"
+},
 
   // Produits payants
   {
