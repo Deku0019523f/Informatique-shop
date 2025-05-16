@@ -1,4 +1,4 @@
-// Initialiser Firebase si pas déjà fait
+// Initialiser Firebase
 if (!firebase.apps.length) {
   firebase.initializeApp({
     apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
@@ -11,57 +11,54 @@ const db = firebase.firestore();
 let cart = [];
 let allProducts = [];
 
+// Affichage groupé par catégorie
 function renderProducts(category = "All") {
   const container = document.getElementById("product-list");
   container.innerHTML = "";
 
-  let products = category === "All"
+  const categories = ["Abonnement", "Logiciel", "FREE"];
+  const grouped = {};
+
+  // Filtrer les produits si une catégorie est sélectionnée
+  let filtered = category === "All"
     ? allProducts
     : allProducts.filter(p => p.category === category);
 
-  products.forEach((p, index) => {
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <img src="${p.img}" alt="${p.title}" />
-      <h3>${p.title}</h3>
-      <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
-      ${
-        p.price == 0 && p.link
-          ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-          : `<button onclick="addToCart(${index})">Ajouter au panier</button>`
-      }
-    `;
-    container.appendChild(div);
+  // Regrouper par catégorie
+  filtered.forEach(p => {
+    if (!grouped[p.category]) grouped[p.category] = [];
+    grouped[p.category].push(p);
   });
+
+  // Affichage par section
+  for (let cat of categories) {
+    if (grouped[cat]) {
+      const section = document.createElement("div");
+      section.innerHTML = `<h2 style="color:#007bff">${cat}</h2>`;
+      grouped[cat].forEach(p => {
+        const div = document.createElement("div");
+        div.className = "product";
+        div.innerHTML = `
+          <img src="${p.img}" alt="${p.title}" />
+          <h3>${p.title}</h3>
+          <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
+          ${
+            p.price == 0 && p.link
+              ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
+              : `<button onclick="addToCartByTitle('${p.title}')">Ajouter au panier</button>`
+          }
+        `;
+        section.appendChild(div);
+      });
+      container.appendChild(section);
+    }
+  }
 }
 
-function renderFilteredProducts(products) {
-  const container = document.getElementById("product-list");
-  container.innerHTML = "";
-  products.forEach((p, index) => {
-    const div = document.createElement("div");
-    div.className = "product";
-    div.innerHTML = `
-      <img src="${p.img}" alt="${p.title}" />
-      <h3>${p.title}</h3>
-      <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
-      ${
-        p.price == 0 && p.link
-          ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-          : `<button onclick="addToCart(${index})">Ajouter au panier</button>`
-      }
-    `;
-    container.appendChild(div);
-  });
-}
-
-function setCategory(c) {
-  renderProducts(c);
-}
-
-function addToCart(index) {
-  const p = allProducts[index];
+// Ajouter au panier par nom (utile si index non fixe)
+function addToCartByTitle(title) {
+  const p = allProducts.find(i => i.title === title);
+  if (!p) return;
   const found = cart.find(i => i.title === p.title);
   if (found) {
     found.qty++;
@@ -71,9 +68,9 @@ function addToCart(index) {
   updateCart();
 }
 
+// Gestion panier
 function updateCart() {
   const list = document.getElementById("cart-items");
-  const summary = document.getElementById("cart-summary");
   const count = document.getElementById("cart-count");
   const sum = document.getElementById("cart-sum");
 
@@ -116,6 +113,7 @@ function sendOrder() {
   const name = document.getElementById("client-name").value.trim();
   const payment = document.getElementById("payment-method").value;
   if (!name || !payment) return alert("Remplissez votre nom et méthode de paiement.");
+
   let msg = `*Nouvelle commande :*%0A`;
   let total = 0;
   cart.forEach(i => {
@@ -126,20 +124,53 @@ function sendOrder() {
   window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
 }
 
-// Filtrage dynamique
+// Recherche dynamique
+document.getElementById("search-bar").addEventListener("input", e => {
+  const q = e.target.value.toLowerCase();
+  const results = allProducts.filter(p =>
+    p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
+  );
+  renderFilteredProducts(results);
+});
+
+function renderFilteredProducts(products) {
+  const container = document.getElementById("product-list");
+  container.innerHTML = "";
+
+  const grouped = {};
+  products.forEach(p => {
+    if (!grouped[p.category]) grouped[p.category] = [];
+    grouped[p.category].push(p);
+  });
+
+  for (let cat in grouped) {
+    const section = document.createElement("div");
+    section.innerHTML = `<h2 style="color:#007bff">${cat}</h2>`;
+    grouped[cat].forEach(p => {
+      const div = document.createElement("div");
+      div.className = "product";
+      div.innerHTML = `
+        <img src="${p.img}" alt="${p.title}" />
+        <h3>${p.title}</h3>
+        <p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>
+        ${
+          p.price == 0 && p.link
+            ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
+            : `<button onclick="addToCartByTitle('${p.title}')">Ajouter au panier</button>`
+        }
+      `;
+      section.appendChild(div);
+    });
+    container.appendChild(section);
+  }
+}
+
+// Filtrage par catégorie
 document.getElementById("category-filter").addEventListener("change", e => {
   renderProducts(e.target.value);
 });
 
-document.getElementById("search-bar").addEventListener("input", e => {
-  const q = e.target.value.toLowerCase();
-  const filtered = allProducts.filter(p =>
-    p.title.toLowerCase().includes(q) || p.category.toLowerCase().includes(q)
-  );
-  renderFilteredProducts(filtered);
-});
-
-// Chargement des produits depuis Firestore
+// Chargement des produits Firebase
 window.onload = () => {
   db.collection("products").orderBy("title").onSnapshot(snapshot => {
     allProducts = [];
