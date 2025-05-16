@@ -1,9 +1,15 @@
 let cart = JSON.parse(localStorage.getItem("cart")) || [];
+let currentCategory = "All";
 
 function renderProducts() {
   const container = document.getElementById("product-list");
   container.innerHTML = "";
-  products.forEach(p => {
+
+  const filtered = currentCategory === "All"
+    ? products
+    : products.filter(p => p.category === currentCategory);
+
+  filtered.forEach(p => {
     const div = document.createElement("div");
     div.className = "product";
     div.innerHTML = `
@@ -16,6 +22,11 @@ function renderProducts() {
     `;
     container.appendChild(div);
   });
+}
+
+function setCategory(cat) {
+  currentCategory = cat;
+  renderProducts();
 }
 
 function addToCart(name, price) {
