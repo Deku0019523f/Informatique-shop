@@ -5,13 +5,14 @@
   <title>Avis clients</title>
   <style>
     body { font-family: Arial; background: #f0f0f0; padding: 30px; }
-    .review-form, .reviews {
-      background: white;
+    .box {
       max-width: 600px;
       margin: auto;
+      background: white;
       padding: 20px;
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
+      margin-bottom: 30px;
     }
     input, textarea, select {
       width: 100%;
@@ -37,35 +38,48 @@
     .stars {
       color: gold;
       font-size: 18px;
-      margin-bottom: 5px;
     }
   </style>
 </head>
 <body>
 
-<div class="review-form">
-  <h2>Laisser un avis</h2>
-  <input type="text" id="review-name" placeholder="Votre nom" required />
-  <input type="email" id="review-email" placeholder="Votre e-mail" required />
-  <textarea id="review-message" rows="4" placeholder="Votre message" required></textarea>
-  <select id="review-rating">
-    <option value="">Note</option>
-    <option value="5">★★★★★ - Excellent</option>
-    <option value="4">★★★★☆ - Très bien</option>
-    <option value="3">★★★☆☆ - Moyen</option>
-    <option value="2">★★☆☆☆ - Faible</option>
-    <option value="1">★☆☆☆☆ - Mauvais</option>
-  </select>
-  <button onclick="submitReview()">Envoyer</button>
+<div class="box" id="login-box">
+  <h2>Connexion</h2>
+  <input type="email" id="login-email" placeholder="Email" />
+  <input type="password" id="login-password" placeholder="Mot de passe" />
+  <button onclick="login()">Se connecter</button>
+  <button onclick="register()">Créer un compte</button>
+  <p id="login-error" style="color:red;"></p>
 </div>
 
-<div class="reviews">
-  <h3>Avis récents</h3>
+<div class="box" id="review-box" style="display:none;">
+  <h2>Laisser ou modifier votre avis</h2>
+  <form id="review-form">
+    <input type="hidden" id="review-id">
+    <input type="text" id="review-name" placeholder="Nom" required />
+    <input type="email" id="review-email" placeholder="Email" required />
+    <textarea id="review-message" placeholder="Message" required></textarea>
+    <select id="review-rating" required>
+      <option value="">Note</option>
+      <option value="5">★★★★★</option>
+      <option value="4">★★★★☆</option>
+      <option value="3">★★★☆☆</option>
+      <option value="2">★★☆☆☆</option>
+      <option value="1">★☆☆☆☆</option>
+    </select>
+    <button type="submit">Enregistrer</button>
+    <button type="button" onclick="logout()" style="background:#dc3545;">Se déconnecter</button>
+  </form>
+</div>
+
+<div class="box" id="my-reviews" style="display:none;">
+  <h2>Vos avis</h2>
   <div id="review-list">Chargement...</div>
 </div>
 
 <!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
@@ -80,57 +94,122 @@
   };
 
   firebase.initializeApp(firebaseConfig);
+  const auth = firebase.auth();
   const db = firebase.firestore();
 
-  const list = document.getElementById("review-list");
+  const loginBox = document.getElementById('login-box');
+  const reviewBox = document.getElementById('review-box');
+  const reviewList = document.getElementById('review-list');
+  const myReviews = document.getElementById('my-reviews');
+  const reviewForm = document.getElementById('review-form');
 
-  function renderReview(doc) {
-    const data = doc.data();
-    const div = document.createElement("div");
-    div.className = "review-entry";
-    const stars = "★".repeat(data.rating || 0) + "☆".repeat(5 - (data.rating || 0));
-    div.innerHTML = `
-      <div class="stars">${stars}</div>
-      <strong>${data.name}</strong> (${data.email})<br>
-      <p>${data.message}</p>
-    `;
-    list.prepend(div);
+  const reviewIdInput = document.getElementById('review-id');
+  const nameInput = document.getElementById('review-name');
+  const emailInput = document.getElementById('review-email');
+  const messageInput = document.getElementById('review-message');
+  const ratingInput = document.getElementById('review-rating');
+
+  auth.onAuthStateChanged(user => {
+    if (user) {
+      loginBox.style.display = 'none';
+      reviewBox.style.display = 'block';
+      myReviews.style.display = 'block';
+      emailInput.value = user.email;
+      loadUserReviews(user.uid);
+    } else {
+      loginBox.style.display = 'block';
+      reviewBox.style.display = 'none';
+      myReviews.style.display = 'none';
+    }
+  });
+
+  function login() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
+    auth.signInWithEmailAndPassword(email, pass).catch(err => {
+      document.getElementById('login-error').textContent = err.message;
+    });
   }
 
-  db.collection("reviews")
-    .orderBy("timestamp", "desc")
-    .onSnapshot(snapshot => {
-      list.innerHTML = "";
-      snapshot.forEach(doc => renderReview(doc));
-      if (snapshot.empty) list.textContent = "Aucun avis encore.";
+  function register() {
+    const email = document.getElementById('login-email').value;
+    const pass = document.getElementById('login-password').value;
+    auth.createUserWithEmailAndPassword(email, pass).catch(err => {
+      document.getElementById('login-error').textContent = err.message;
     });
+  }
 
-  function submitReview() {
-    const name = document.getElementById("review-name").value.trim();
-    const email = document.getElementById("review-email").value.trim();
-    const message = document.getElementById("review-message").value.trim();
-    const rating = parseInt(document.getElementById("review-rating").value);
+  function logout() {
+    auth.signOut();
+  }
 
-    if (!name || !email || !message || !rating) {
-      alert("Veuillez remplir tous les champs.");
-      return;
-    }
-
-    db.collection("reviews").add({
-      name,
-      email,
-      message,
-      rating,
+  reviewForm.addEventListener('submit', e => {
+    e.preventDefault();
+    const id = reviewIdInput.value;
+    const data = {
+      name: nameInput.value,
+      email: emailInput.value,
+      message: messageInput.value,
+      rating: parseInt(ratingInput.value),
+      uid: auth.currentUser.uid,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
-    }).then(() => {
-      alert("Merci pour votre avis !");
-      document.getElementById("review-name").value = "";
-      document.getElementById("review-email").value = "";
-      document.getElementById("review-message").value = "";
-      document.getElementById("review-rating").value = "";
-    }).catch(err => {
-      alert("Erreur : " + err.message);
+    };
+    if (id) {
+      db.collection('reviews').doc(id).update(data).then(() => {
+        alert("Avis mis à jour.");
+        reviewForm.reset();
+        loadUserReviews(auth.currentUser.uid);
+      });
+    } else {
+      db.collection('reviews').add(data).then(() => {
+        alert("Avis ajouté.");
+        reviewForm.reset();
+        loadUserReviews(auth.currentUser.uid);
+      });
+    }
+  });
+
+  function loadUserReviews(uid) {
+    reviewList.innerHTML = "Chargement...";
+    db.collection('reviews').where("uid", "==", uid).orderBy("timestamp", "desc")
+      .onSnapshot(snapshot => {
+        reviewList.innerHTML = "";
+        snapshot.forEach(doc => {
+          const r = doc.data();
+          const div = document.createElement("div");
+          const stars = "★".repeat(r.rating || 0) + "☆".repeat(5 - (r.rating || 0));
+          div.className = "review-entry";
+          div.innerHTML = `
+            <div class="stars">${stars}</div>
+            <strong>${r.name}</strong> (${r.email})<br/>
+            <p>${r.message}</p>
+            <button onclick="editReview('${doc.id}')">Modifier</button>
+            <button onclick="deleteReview('${doc.id}')">Supprimer</button>
+          `;
+          reviewList.appendChild(div);
+        });
+        if (snapshot.empty) reviewList.innerHTML = "Aucun avis pour le moment.";
+      });
+  }
+
+  function editReview(id) {
+    db.collection('reviews').doc(id).get().then(doc => {
+      if (doc.exists) {
+        const r = doc.data();
+        reviewIdInput.value = doc.id;
+        nameInput.value = r.name;
+        emailInput.value = r.email;
+        messageInput.value = r.message;
+        ratingInput.value = r.rating || '';
+        window.scrollTo({ top: 0, behavior: 'smooth' });
+      }
     });
+  }
+
+  function deleteReview(id) {
+    if (confirm("Supprimer cet avis ?")) {
+      db.collection('reviews').doc(id).delete();
+    }
   }
 </script>
 
