@@ -2,7 +2,7 @@
 <html lang="fr">
 <head>
   <meta charset="UTF-8" />
-  <title>Avis des clients - Firebase</title>
+  <title>Avis clients</title>
   <style>
     body { font-family: Arial; background: #f0f0f0; padding: 30px; }
     .review-form, .reviews {
@@ -13,7 +13,7 @@
       border-radius: 8px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    input, textarea {
+    input, textarea, select {
       width: 100%;
       padding: 10px;
       margin-top: 10px;
@@ -30,9 +30,14 @@
       cursor: pointer;
     }
     .review-entry {
-      margin-bottom: 15px;
       border-bottom: 1px solid #ddd;
+      margin-bottom: 15px;
       padding-bottom: 10px;
+    }
+    .stars {
+      color: gold;
+      font-size: 18px;
+      margin-bottom: 5px;
     }
   </style>
 </head>
@@ -42,7 +47,15 @@
   <h2>Laisser un avis</h2>
   <input type="text" id="review-name" placeholder="Votre nom" required />
   <input type="email" id="review-email" placeholder="Votre e-mail" required />
-  <textarea id="review-message" rows="5" placeholder="Votre message" required></textarea>
+  <textarea id="review-message" rows="4" placeholder="Votre message" required></textarea>
+  <select id="review-rating">
+    <option value="">Note</option>
+    <option value="5">★★★★★ - Excellent</option>
+    <option value="4">★★★★☆ - Très bien</option>
+    <option value="3">★★★☆☆ - Moyen</option>
+    <option value="2">★★☆☆☆ - Faible</option>
+    <option value="1">★☆☆☆☆ - Mauvais</option>
+  </select>
   <button onclick="submitReview()">Envoyer</button>
 </div>
 
@@ -56,7 +69,6 @@
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 
 <script>
-  // Config Firebase (mets ici ta config)
   const firebaseConfig = {
     apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
     authDomain: "informatique-shop-53a25.firebaseapp.com",
@@ -70,34 +82,36 @@
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  const reviewList = document.getElementById("review-list");
+  const list = document.getElementById("review-list");
 
   function renderReview(doc) {
     const data = doc.data();
     const div = document.createElement("div");
     div.className = "review-entry";
+    const stars = "★".repeat(data.rating || 0) + "☆".repeat(5 - (data.rating || 0));
     div.innerHTML = `
-      <strong>${data.name}</strong> (${data.email})<br/>
+      <div class="stars">${stars}</div>
+      <strong>${data.name}</strong> (${data.email})<br>
       <p>${data.message}</p>
     `;
-    reviewList.prepend(div);
+    list.prepend(div);
   }
 
-  // Écoute temps réel Firestore
   db.collection("reviews")
     .orderBy("timestamp", "desc")
     .onSnapshot(snapshot => {
-      reviewList.innerHTML = "";
+      list.innerHTML = "";
       snapshot.forEach(doc => renderReview(doc));
-      if(snapshot.empty) reviewList.textContent = "Aucun avis encore.";
+      if (snapshot.empty) list.textContent = "Aucun avis encore.";
     });
 
   function submitReview() {
     const name = document.getElementById("review-name").value.trim();
     const email = document.getElementById("review-email").value.trim();
     const message = document.getElementById("review-message").value.trim();
+    const rating = parseInt(document.getElementById("review-rating").value);
 
-    if (!name || !email || !message) {
+    if (!name || !email || !message || !rating) {
       alert("Veuillez remplir tous les champs.");
       return;
     }
@@ -106,14 +120,16 @@
       name,
       email,
       message,
+      rating,
       timestamp: firebase.firestore.FieldValue.serverTimestamp()
     }).then(() => {
       alert("Merci pour votre avis !");
       document.getElementById("review-name").value = "";
       document.getElementById("review-email").value = "";
       document.getElementById("review-message").value = "";
+      document.getElementById("review-rating").value = "";
     }).catch(err => {
-      alert("Erreur lors de l'envoi : " + err.message);
+      alert("Erreur : " + err.message);
     });
   }
 </script>
