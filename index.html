@@ -5,7 +5,7 @@
   <meta name="viewport" content="width=device-width, initial-scale=1.0" />
   <title>Informatique Shop</title>
   <style>
-    body { font-family: Arial, sans-serif; background: #f4f4f4; margin: 0; padding: 0; }
+    body { font-family: Arial; background: #f4f4f4; margin: 0; padding: 0; }
     header, footer { background: #222; color: white; text-align: center; padding: 1rem; }
     main { padding: 20px; }
     .product { background: white; padding: 15px; border-radius: 8px; margin: 10px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
@@ -14,7 +14,8 @@
     button:hover { background: #0056b3; }
     #cart, .cart-item { background: white; padding: 15px; border-radius: 8px; margin: 15px 0; box-shadow: 0 0 5px rgba(0,0,0,0.1); }
     input, select { padding: 8px; margin-top: 10px; width: 100%; max-width: 300px; display: block; border-radius: 5px; border: 1px solid #ccc; }
-    a { text-decoration: none; }
+    #toast { position: fixed; bottom: 20px; right: 20px; background: #28a745; color: white; padding: 10px; border-radius: 5px; display: none; }
+    #cart-summary { position: fixed; top: 10px; right: 10px; background: #007bff; color: white; padding: 10px; border-radius: 8px; z-index: 1000; }
   </style>
 </head>
 <body>
@@ -22,6 +23,8 @@
 <header>
   <h1>Informatique Shop</h1>
 </header>
+
+<div id="cart-summary">Articles : <span id="cart-count">0</span> | Total : <span id="cart-sum">0 FCFA</span></div>
 
 <main>
   <section id="cart">
@@ -47,91 +50,9 @@
   © 2025 Informatique Shop - Tous droits réservés
 </footer>
 
+<div id="toast"></div>
+
 <script src="products.js"></script>
-<script>
-  let cart = JSON.parse(localStorage.getItem("cart")) || [];
-
-  function renderProducts() {
-    const container = document.getElementById("product-list");
-    container.innerHTML = "";
-    products.forEach(p => {
-      const div = document.createElement("div");
-      div.className = "product";
-      div.innerHTML = `
-        <img src="${p.img}" alt="${p.title}">
-        <h3>${p.title}</h3>
-        <p>Prix : ${p.price === 0 ? "Gratuit" : p.price + " FCFA"}</p>
-        ${p.price === 0 && p.link
-          ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-          : `<button onclick="addToCart('${p.title}', ${p.price})">Ajouter au panier</button>`}
-      `;
-      container.appendChild(div);
-    });
-  }
-
-  function addToCart(name, price) {
-    const existing = cart.find(item => item.name === name);
-    if (existing) {
-      existing.qty++;
-    } else {
-      cart.push({ name, price, qty: 1 });
-    }
-    localStorage.setItem("cart", JSON.stringify(cart));
-    updateCart();
-  }
-
-  function updateCart() {
-    const items = document.getElementById("cart-items");
-    const total = document.getElementById("cart-total");
-    const orderBtn = document.getElementById("order-btn");
-    let sum = 0;
-    items.innerHTML = "";
-    if (cart.length === 0) {
-      items.textContent = "Aucun produit pour le moment.";
-      total.textContent = "";
-      orderBtn.style.display = "none";
-      return;
-    }
-
-    cart.forEach(item => {
-      const line = document.createElement("div");
-      line.className = "cart-item";
-      line.textContent = `${item.name} x ${item.qty} = ${item.qty * item.price} FCFA`;
-      items.appendChild(line);
-      sum += item.qty * item.price;
-    });
-
-    total.textContent = `Total : ${sum} FCFA`;
-    orderBtn.style.display = "block";
-  }
-
-  function clearCart() {
-    cart = [];
-    localStorage.removeItem("cart");
-    updateCart();
-  }
-
-  function sendOrder() {
-    const name = document.getElementById("client-name").value.trim();
-    const payment = document.getElementById("payment-method").value;
-    if (!name || !payment || cart.length === 0) {
-      alert("Remplissez toutes les informations.");
-      return;
-    }
-
-    let msg = `*Nouvelle commande :*%0A`;
-    let total = 0;
-    cart.forEach(i => {
-      msg += `- ${i.name} x${i.qty} = ${i.qty * i.price} FCFA%0A`;
-      total += i.qty * i.price;
-    });
-    msg += `Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}`;
-    window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
-  }
-
-  renderProducts();
-  updateCart();
-</script>
-
+<script src="main.js"></script>
 </body>
 </html>
