@@ -11,7 +11,7 @@
       max-width: 1200px;
       margin: auto;
     }
-    h1, h2 {
+    h1, h2, h4 {
       color: #007bff;
     }
     .hidden { display: none; }
@@ -78,7 +78,6 @@
     <!-- Gestion produits -->
     <div class="section">
       <h2>Gestion des produits</h2>
-
       <form id="product-form">
         <input type="hidden" id="product-id" />
         <input type="text" id="title" placeholder="Nom du produit" required />
@@ -124,8 +123,26 @@
       </table>
     </div>
 
-  </div>
+    <!-- Gestion messagerie -->
+    <div class="section">
+      <h2>Messagerie en direct</h2>
+      <div style="display: flex; gap: 20px; flex-wrap: wrap">
+        <div style="flex:1;min-width:200px">
+          <h4>Utilisateurs</h4>
+          <ul id="user-list" style="list-style:none;padding-left:0"></ul>
+        </div>
+        <div style="flex:2;min-width:300px">
+          <h4>Discussion</h4>
+          <div id="chat-view" style="border:1px solid #ccc;padding:10px;height:300px;overflow-y:auto;background:white;margin-bottom:10px;border-radius:5px"></div>
+          <form id="chat-form" onsubmit="sendAdminMsg(event)">
+            <input type="text" id="admin-msg" placeholder="Message..." style="width:100%;padding:10px;border:1px solid #ccc;border-radius:5px" />
+          </form>
+        </div>
+      </div>
+    </div>
+    </div> <!-- fin admin-div -->
 
+  <!-- Firebase SDK -->
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
   <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -135,10 +152,6 @@
       apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
       authDomain: "informatique-shop-53a25.firebaseapp.com",
       projectId: "informatique-shop-53a25",
-      storageBucket: "informatique-shop-53a25.firebasestorage.app",
-      messagingSenderId: "1070472171156",
-      appId: "1:1070472171156:web:6214bbe7726c12ce666e81",
-      measurementId: "G-WCQCBR1CNR"
     };
 
     firebase.initializeApp(firebaseConfig);
@@ -161,7 +174,6 @@
     const imgInput = document.getElementById('img');
     const linkInput = document.getElementById('link');
 
-    // Auth State
     auth.onAuthStateChanged(user => {
       if (user) {
         loginDiv.style.display = 'none';
@@ -169,6 +181,7 @@
         loadProducts();
         loadOrders();
         loadReviews();
+        loadChats();
       } else {
         loginDiv.style.display = 'block';
         adminDiv.classList.add('hidden');
@@ -183,18 +196,17 @@
         loginError.textContent = 'Veuillez remplir tous les champs.';
         return;
       }
-      auth.signInWithEmailAndPassword(email, password).catch(e => {
-        loginError.textContent = e.message;
-      });
+      auth.signInWithEmailAndPassword(email, password)
+        .catch(e => {
+          loginError.textContent = e.message;
+        });
     }
 
     function logout() {
       auth.signOut();
     }
 
-    // Load products from Firestore
     function loadProducts() {
-      productsTableBody.innerHTML = '<tr><td colspan="4">Chargement...</td></tr>';
       db.collection('products').orderBy('title').onSnapshot(snapshot => {
         productsTableBody.innerHTML = '';
         snapshot.forEach(doc => {
@@ -214,7 +226,6 @@
       });
     }
 
-    // Add or update product
     productForm.addEventListener('submit', e => {
       e.preventDefault();
       const id = productIdInput.value;
@@ -226,7 +237,7 @@
         link: linkInput.value.trim()
       };
       if (!data.title || !data.category || !data.img || isNaN(data.price)) {
-        alert('Veuillez remplir correctement tous les champs obligatoires.');
+        alert('Veuillez remplir tous les champs obligatoires.');
         return;
       }
       if (id) {
@@ -257,7 +268,7 @@
           categoryInput.value = p.category;
           imgInput.value = p.img;
           linkInput.value = p.link || '';
-          window.scrollTo({top: 0, behavior: 'smooth'});
+          window.scrollTo({ top: 0, behavior: 'smooth' });
         }
       });
     }
@@ -313,7 +324,65 @@
           .catch(e => alert('Erreur : ' + e.message));
       }
     }
-  </script>
+    // ===== MESSAGERIE DIRECTE =====
 
+    let currentChatId = null;
+
+    function loadChats() {
+      const userList = document.getElementById('user-list');
+      db.collection('chats').orderBy('created', 'desc').onSnapshot(snapshot => {
+        userList.innerHTML = '';
+        snapshot.forEach(doc => {
+          const data = doc.data();
+          const li = document.createElement('li');
+          li.style.cursor = 'pointer';
+          li.style.padding = '8px';
+          li.style.borderBottom = '1px solid #eee';
+          li.textContent = data.userName || doc.id;
+          li.onclick = () => openChat(doc.id, data.userName);
+          userList.appendChild(li);
+        });
+      });
+    }
+
+    function openChat(userId, name) {
+      currentChatId = userId;
+      const chatView = document.getElementById('chat-view');
+      chatView.innerHTML = `<p><strong>${name}</strong></p>`;
+
+      db.collection('chats').doc(userId).collection('messages')
+        .orderBy('timestamp')
+        .onSnapshot(snapshot => {
+          chatView.innerHTML = `<p><strong>${name}</strong></p>`;
+          snapshot.forEach(doc => {
+            const msg = doc.data();
+            const div = document.createElement('div');
+            div.textContent = msg.text;
+            div.style.margin = '8px 0';
+            div.style.padding = '8px 12px';
+            div.style.borderRadius = '8px';
+            div.style.maxWidth = '70%';
+            div.style.background = msg.from === 'admin' ? '#007bff' : '#e4e6eb';
+            div.style.color = msg.from === 'admin' ? 'white' : 'black';
+            div.style.alignSelf = msg.from === 'admin' ? 'flex-end' : 'flex-start';
+            chatView.appendChild(div);
+          });
+          chatView.scrollTop = chatView.scrollHeight;
+        });
+    }
+
+    function sendAdminMsg(e) {
+      e.preventDefault();
+      const input = document.getElementById('admin-msg');
+      const text = input.value.trim();
+      if (!text || !currentChatId) return;
+      db.collection("chats").doc(currentChatId).collection("messages").add({
+        text,
+        from: "admin",
+        timestamp: firebase.firestore.FieldValue.serverTimestamp()
+      });
+      input.value = '';
+    }
+  </script>
 </body>
 </html>
