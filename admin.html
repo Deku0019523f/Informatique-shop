@@ -330,7 +330,7 @@
 
     function loadChats() {
       const userList = document.getElementById('user-list');
-      db.collection('chats').orderBy('created', 'desc').onSnapshot(snapshot => {
+      db.collection('Messagerie').orderBy('created', 'desc').onSnapshot(snapshot => {
         userList.innerHTML = '';
         snapshot.forEach(doc => {
           const data = doc.data();
@@ -350,7 +350,7 @@
       const chatView = document.getElementById('chat-view');
       chatView.innerHTML = `<p><strong>${name}</strong></p>`;
 
-      db.collection('chats').doc(userId).collection('messages')
+      db.collection('Messagerie').doc(userId).collection('messages')
         .orderBy('timestamp')
         .onSnapshot(snapshot => {
           chatView.innerHTML = `<p><strong>${name}</strong></p>`;
@@ -376,7 +376,7 @@
       const input = document.getElementById('admin-msg');
       const text = input.value.trim();
       if (!text || !currentChatId) return;
-      db.collection("chats").doc(currentChatId).collection("messages").add({
+      db.collection("Messagerie").doc(currentChatId).collection("messages").add({
         text,
         from: "admin",
         timestamp: firebase.firestore.FieldValue.serverTimestamp()
