@@ -1,0 +1,157 @@
+<!DOCTYPE html>
+<html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <title>Chat - Informatique Shop</title>
+  <style>
+    body {
+      font-family: 'Arial', sans-serif;
+      background: #f0f2f5;
+      margin: 0;
+      display: flex;
+      justify-content: center;
+      align-items: center;
+      height: 100vh;
+    }
+    #chat-box {
+      width: 100%;
+      max-width: 500px;
+      background: white;
+      border-radius: 10px;
+      box-shadow: 0 4px 15px rgba(0,0,0,0.1);
+      display: flex;
+      flex-direction: column;
+      overflow: hidden;
+      animation: slideUp 0.6s ease;
+    }
+    @keyframes slideUp {
+      from { transform: translateY(100px); opacity: 0; }
+      to { transform: translateY(0); opacity: 1; }
+    }
+    #messages {
+      flex: 1;
+      padding: 15px;
+      overflow-y: auto;
+    }
+    .msg {
+      margin: 10px 0;
+      padding: 10px;
+      border-radius: 10px;
+      max-width: 80%;
+      animation: fadeIn 0.3s ease;
+    }
+    .user { background: #007bff; color: white; align-self: flex-end; }
+    .admin { background: #e4e6eb; color: black; align-self: flex-start; }
+    @keyframes fadeIn {
+      from { opacity: 0; transform: translateY(10px); }
+      to { opacity: 1; transform: translateY(0); }
+    }
+    #form {
+      display: flex;
+      border-top: 1px solid #ccc;
+    }
+    #form input {
+      flex: 1;
+      padding: 15px;
+      border: none;
+      font-size: 16px;
+      outline: none;
+    }
+    #form button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 0 20px;
+      cursor: pointer;
+    }
+    #start-box {
+      padding: 20px;
+      text-align: center;
+    }
+  </style>
+</head>
+<body>
+
+<div id="chat-box">
+  <div id="start-box">
+    <h3>Bienvenue sur le chat !</h3>
+    <input type="text" id="username" placeholder="Votre prénom..." style="padding:10px;width:80%;border-radius:5px" />
+    <br><br>
+    <button onclick="startChat()" style="padding:10px 20px;border:none;background:#007bff;color:white;border-radius:5px">Commencer</button>
+  </div>
+
+  <div id="messages" class="hidden"></div>
+
+  <form id="form" class="hidden" onsubmit="sendMessage(event)">
+    <input id="message-input" placeholder="Votre message..." autocomplete="off" />
+    <button>Envoyer</button>
+  </form>
+</div>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<script>
+  const firebaseConfig = {
+    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
+    authDomain: "informatique-shop-53a25.firebaseapp.com",
+    projectId: "informatique-shop-53a25",
+  };
+  firebase.initializeApp(firebaseConfig);
+  const db = firebase.firestore();
+
+  let userName = '';
+  let userId = '';
+
+  function startChat() {
+    const input = document.getElementById('username');
+    userName = input.value.trim();
+    if (!userName) return alert("Entrez un nom pour discuter.");
+
+    userId = "user_" + Date.now(); // identifiant temporaire
+
+    db.collection("chats").doc(userId).set({
+      userName,
+      created: firebase.firestore.FieldValue.serverTimestamp()
+    });
+
+    document.getElementById('start-box').style.display = 'none';
+    document.getElementById('messages').classList.remove('hidden');
+    document.getElementById('form').classList.remove('hidden');
+    listenToMessages();
+  }
+
+  function sendMessage(e) {
+    e.preventDefault();
+    const input = document.getElementById('message-input');
+    const text = input.value.trim();
+    if (!text) return;
+    input.value = '';
+    db.collection("chats").doc(userId).collection("messages").add({
+      text,
+      from: "user",
+      timestamp: firebase.firestore.FieldValue.serverTimestamp()
+    });
+  }
+
+  function listenToMessages() {
+    const msgDiv = document.getElementById('messages');
+    db.collection("chats").doc(userId).collection("messages")
+      .orderBy("timestamp")
+      .onSnapshot(snapshot => {
+        msgDiv.innerHTML = '';
+        snapshot.forEach(doc => {
+          const msg = doc.data();
+          const div = document.createElement('div');
+          div.className = `msg ${msg.from}`;
+          div.textContent = msg.text;
+          msgDiv.appendChild(div);
+        });
+        msgDiv.scrollTop = msgDiv.scrollHeight;
+      });
+  }
+</script>
+
+</body>
+</html>
