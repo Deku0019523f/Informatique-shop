@@ -140,5 +140,22 @@
     </select>
     <button onclick="clearCart()">Vider le panier</button>
     <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
-  </section>  <section id="product-list"></section></main><!-- Firebase SDK --><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script><script src="main.js"></script><script src="js/whatsapp-button.js"></script></body>
+  </section>  <section id="product-list"></section></main><!-- Firebase SDK --><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script><script src="main.js"></script><script src="js/whatsapp-button.js"></script>
+<script>
+  // Initialiser Firebase si ce n’est pas déjà fait
+  const db = firebase.firestore();
+
+  // Fonction de log de visite
+  function logVisit(page = window.location.pathname) {
+    db.collection('visits').add({
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent,
+      page: page
+    }).catch(err => console.error('Erreur de log visite:', err));
+  }
+
+  // Enregistre automatiquement la visite
+  logVisit();
+</script>
+</body>
 </html>
