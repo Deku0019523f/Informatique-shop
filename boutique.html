@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -108,7 +109,9 @@
     }
   </style>
 </head>
-<body><header>
+<body>
+
+<header>
   <h1>Informatique Shop</h1>
   <nav>
     <a href="index.html">Accueil</a>
@@ -116,9 +119,14 @@
     <a href="reviews.html">Avis</a>
     <a href="contact.html">Contact</a>
   </nav>
-</header><div id="cart-summary">
+</header>
+
+<div id="cart-summary">
   Articles : <span id="cart-count">0</span> | Total : <span id="cart-sum">0 FCFA</span>
-</div><main>  <div class="filters">
+</div>
+
+<main>
+  <div class="filters">
     <input type="text" id="search-bar" placeholder="Rechercher un produit..." />
     <select id="category-filter">
       <option value="All">Toutes les catégories</option>
@@ -126,7 +134,9 @@
       <option value="Abonnement">Abonnement</option>
       <option value="Logiciel">Logiciel</option>
     </select>
-  </div>  <section id="cart">
+  </div>
+
+  <section id="cart">
     <h3>Panier</h3>
     <div id="cart-items">Aucun produit pour le moment.</div>
     <div id="cart-total" style="font-weight:bold; margin-top:10px;"></div>
@@ -140,22 +150,42 @@
     </select>
     <button onclick="clearCart()">Vider le panier</button>
     <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
-  </section>  <section id="product-list"></section></main><!-- Firebase SDK --><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script><script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script><script src="main.js"></script><script src="js/whatsapp-button.js"></script>
+  </section>
+
+  <section id="product-list"></section>
+</main>
+
+<!-- Firebase SDK -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="main.js"></script>
+<script src="js/whatsapp-button.js"></script>
+
 <script>
-  // Initialiser Firebase si ce n’est pas déjà fait
+  // Initialisation Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
+    authDomain: "informatique-shop-53a25.firebaseapp.com",
+    projectId: "informatique-shop-53a25",
+  };
+  firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
 
-  // Fonction de log de visite
+  // Enregistre la visite
   function logVisit(page = window.location.pathname) {
     db.collection('visits').add({
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       userAgent: navigator.userAgent,
       page: page
-    }).catch(err => console.error('Erreur de log visite:', err));
+    }).then(() => {
+      console.log('Visite enregistrée');
+    }).catch(err => {
+      console.error('Erreur visite :', err.message);
+    });
   }
 
-  // Enregistre automatiquement la visite
   logVisit();
 </script>
+
 </body>
 </html>
