@@ -24,6 +24,7 @@
       border-radius: 5px;
       cursor: pointer;
     }
+    button.logout { background: #dc3545; float: right; }
     button:hover { background: #0056b3; }
     input, select {
       padding: 8px;
@@ -53,11 +54,6 @@
       margin-bottom: 40px;
       box-shadow: 0 0 10px rgba(0,0,0,0.1);
     }
-    .logout {
-      background: #dc3545;
-      float: right;
-      margin-top: -60px;
-    }
   </style>
 </head>
 <body>
@@ -75,15 +71,56 @@
 <div id="admin-div" class="hidden">
   <button class="logout" onclick="logout()">Se déconnecter</button>
 
+  <!-- Produits -->
+  <div class="section">
+    <h2>Gestion des produits</h2>
+    <form id="product-form">
+      <input type="hidden" id="product-id" />
+      <input type="text" id="title" placeholder="Nom du produit" required />
+      <input type="number" id="price" placeholder="Prix en FCFA" required min="0" />
+      <select id="category" required>
+        <option value="">Catégorie</option>
+        <option value="FREE">Gratuit</option>
+        <option value="Abonnement">Abonnement</option>
+        <option value="Logiciel">Logiciel</option>
+      </select>
+      <input type="text" id="img" placeholder="URL image (ex: images/nom.jpg)" required />
+      <input type="text" id="link" placeholder="Lien de téléchargement (optionnel)" />
+      <button type="submit">Ajouter / Modifier produit</button>
+    </form>
+    <table id="products-table">
+      <thead><tr><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Commandes -->
+  <div class="section">
+    <h2>Commandes reçues</h2>
+    <table id="orders-table">
+      <thead><tr><th>Client</th><th>Produits</th><th>Total</th><th>Paiement</th><th>Date</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Avis -->
+  <div class="section">
+    <h2>Avis clients</h2>
+    <table id="reviews-table">
+      <thead><tr><th>Nom</th><th>Email</th><th>Message</th><th>Note</th><th>Actions</th></tr></thead>
+      <tbody></tbody>
+    </table>
+  </div>
+
+  <!-- Statistiques visites -->
   <div class="section">
     <h2>Statistiques visiteurs</h2>
     <p>Total des visites : <strong id="visit-total">Chargement...</strong></p>
     <ul id="visits-by-day"></ul>
   </div>
-
-  <!-- Tu peux ici ajouter d'autres sections produits, commandes, avis si besoin -->
 </div>
 
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
@@ -94,7 +131,6 @@
     authDomain: "informatique-shop-53a25.firebaseapp.com",
     projectId: "informatique-shop-53a25"
   };
-
   firebase.initializeApp(firebaseConfig);
   const auth = firebase.auth();
   const db = firebase.firestore();
@@ -107,6 +143,9 @@
     if (user) {
       loginDiv.style.display = 'none';
       adminDiv.classList.remove('hidden');
+      loadProducts();
+      loadOrders();
+      loadReviews();
       loadVisits();
     } else {
       loginDiv.style.display = 'block';
@@ -118,7 +157,7 @@
     const email = document.getElementById('email').value.trim();
     const password = document.getElementById('password').value.trim();
     loginError.textContent = '';
-    if (!email || !password) return loginError.textContent = 'Veuillez remplir tous les champs.';
+    if (!email || !password) return loginError.textContent = 'Champs requis.';
     auth.signInWithEmailAndPassword(email, password).catch(e => {
       loginError.textContent = e.message;
     });
@@ -128,6 +167,120 @@
     auth.signOut();
   }
 
+  function loadProducts() {
+    const tbody = document.querySelector('#products-table tbody');
+    db.collection('products').orderBy('title').onSnapshot(snapshot => {
+      tbody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const p = doc.data();
+        tbody.innerHTML += `
+          <tr>
+            <td>${p.title}</td>
+            <td>${p.price} FCFA</td>
+            <td>${p.category}</td>
+            <td>
+              <button onclick="editProduct('${doc.id}')">Modifier</button>
+              <button onclick="deleteProduct('${doc.id}')">Supprimer</button>
+            </td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  function editProduct(id) {
+    db.collection('products').doc(id).get().then(doc => {
+      if (doc.exists) {
+        const p = doc.data();
+        document.getElementById('product-id').value = doc.id;
+        document.getElementById('title').value = p.title;
+        document.getElementById('price').value = p.price;
+        document.getElementById('category').value = p.category;
+        document.getElementById('img').value = p.img;
+        document.getElementById('link').value = p.link || '';
+        window.scrollTo({top: 0, behavior: 'smooth'});
+      }
+    });
+  }
+
+  function deleteProduct(id) {
+    if (confirm("Supprimer ce produit ?")) {
+      db.collection('products').doc(id).delete();
+    }
+  }
+
+  document.getElementById('product-form').addEventListener('submit', e => {
+    e.preventDefault();
+    const id = document.getElementById('product-id').value;
+    const data = {
+      title: document.getElementById('title').value.trim(),
+      price: Number(document.getElementById('price').value),
+      category: document.getElementById('category').value,
+      img: document.getElementById('img').value.trim(),
+      link: document.getElementById('link').value.trim()
+    };
+    if (!data.title || !data.category || !data.img || isNaN(data.price)) {
+      alert("Remplissez tous les champs obligatoires.");
+      return;
+    }
+    if (id) {
+      db.collection('products').doc(id).update(data).then(() => {
+        alert("Produit modifié.");
+        e.target.reset();
+        document.getElementById('product-id').value = '';
+      });
+    } else {
+      db.collection('products').add(data).then(() => {
+        alert("Produit ajouté.");
+        e.target.reset();
+      });
+    }
+  });
+
+  function loadOrders() {
+    const tbody = document.querySelector('#orders-table tbody');
+    db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+      tbody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const o = doc.data();
+        tbody.innerHTML += `
+          <tr>
+            <td>${o.name}</td>
+            <td>${o.items}</td>
+            <td>${o.total} FCFA</td>
+            <td>${o.payment}</td>
+            <td>${o.timestamp?.toDate().toLocaleString() || ''}</td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  function loadReviews() {
+    const tbody = document.querySelector('#reviews-table tbody');
+    db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
+      tbody.innerHTML = '';
+      snapshot.forEach(doc => {
+        const r = doc.data();
+        tbody.innerHTML += `
+          <tr>
+            <td>${r.name}</td>
+            <td>${r.email}</td>
+            <td>${r.message}</td>
+            <td>${r.rating || ''}</td>
+            <td><button onclick="deleteReview('${doc.id}')">Supprimer</button></td>
+          </tr>
+        `;
+      });
+    });
+  }
+
+  function deleteReview(id) {
+    if (confirm("Supprimer cet avis ?")) {
+      db.collection('reviews').doc(id).delete();
+    }
+  }
+
   function loadVisits() {
     const totalSpan = document.getElementById('visit-total');
     const dayList = document.getElementById('visits-by-day');
@@ -135,8 +288,7 @@
       totalSpan.textContent = snapshot.size;
       const byDate = {};
       snapshot.forEach(doc => {
-        const data = doc.data();
-        const d = data.timestamp?.toDate();
+        const d = doc.data().timestamp?.toDate();
         if (d) {
           const dateStr = d.toISOString().slice(0, 10);
           byDate[dateStr] = (byDate[dateStr] || 0) + 1;
@@ -149,8 +301,8 @@
         dayList.appendChild(li);
       });
     }).catch(err => {
-      console.error("Erreur de chargement des visites :", err.message);
       totalSpan.textContent = "Erreur";
+      console.error("Erreur chargement visites :", err.message);
     });
   }
 </script>
