@@ -1,5 +1,4 @@
-<!DOCTYPE html>
-<html lang="fr">
+<!DOCTYPE html><html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <title>Admin - Informatique Shop</title>
@@ -11,7 +10,7 @@
       max-width: 1200px;
       margin: auto;
     }
-    h1, h2, h4 {
+    h1, h2 {
       color: #007bff;
     }
     .hidden { display: none; }
@@ -60,100 +59,57 @@
     }
   </style>
 </head>
-<body>
-
-  <h1>Admin - Informatique Shop</h1>
-
-  <div id="login-div" class="section">
+<body>  <h1>Admin - Informatique Shop</h1>  <div id="login-div" class="section">
     <h2>Connexion Admin</h2>
     <input type="email" id="email" placeholder="Email" />
     <input type="password" id="password" placeholder="Mot de passe" />
     <button onclick="login()">Se connecter</button>
     <p id="login-error" style="color:red;"></p>
-  </div>
+  </div>  <div id="admin-div" class="hidden">
+    <button class="logout" onclick="logout()">Se déconnecter</button><div class="section">
+  <h2>Gestion des produits</h2>
+  <form id="product-form">
+    <input type="hidden" id="product-id" />
+    <input type="text" id="title" placeholder="Nom du produit" required />
+    <input type="number" id="price" placeholder="Prix en FCFA" required min="0" />
+    <select id="category" required>
+      <option value="">Catégorie</option>
+      <option value="FREE">Gratuit</option>
+      <option value="Abonnement">Abonnement</option>
+      <option value="Logiciel">Logiciel</option>
+    </select>
+    <input type="text" id="img" placeholder="URL image" required />
+    <input type="text" id="link" placeholder="Lien de téléchargement (optionnel)" />
+    <button type="submit">Ajouter / Modifier produit</button>
+  </form>
+  <table id="products-table"><thead><tr><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Actions</th></tr></thead><tbody></tbody></table>
+</div>
 
-  <div id="admin-div" class="hidden">
-    <button class="logout" onclick="logout()">Se déconnecter</button>
+<div class="section">
+  <h2>Commandes reçues</h2>
+  <table id="orders-table"><thead><tr><th>Client</th><th>Produits</th><th>Total</th><th>Paiement</th><th>Date</th></tr></thead><tbody></tbody></table>
+</div>
 
-    <!-- Gestion produits -->
-    <div class="section">
-      <h2>Gestion des produits</h2>
-      <form id="product-form">
-        <input type="hidden" id="product-id" />
-        <input type="text" id="title" placeholder="Nom du produit" required />
-        <input type="number" id="price" placeholder="Prix en FCFA" required min="0" />
-        <select id="category" required>
-          <option value="">Catégorie</option>
-          <option value="FREE">Gratuit</option>
-          <option value="Abonnement">Abonnement</option>
-          <option value="Logiciel">Logiciel</option>
-        </select>
-        <input type="text" id="img" placeholder="URL image (ex: images/nom.jpg)" required />
-        <input type="text" id="link" placeholder="Lien de téléchargement (optionnel)" />
-        <button type="submit">Ajouter / Modifier produit</button>
-      </form>
+<div class="section">
+  <h2>Avis clients</h2>
+  <table id="reviews-table"><thead><tr><th>Nom</th><th>Email</th><th>Message</th><th>Note</th><th>Actions</th></tr></thead><tbody></tbody></table>
+</div>
 
-      <table id="products-table">
-        <thead>
-          <tr><th>Nom</th><th>Prix</th><th>Catégorie</th><th>Actions</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
+<div class="section">
+  <h2>Statistiques visiteurs</h2>
+  <p>Total des visites : <strong id="visit-total">Chargement...</strong></p>
+  <ul id="visits-by-day"></ul>
+</div>
 
-    <!-- Gestion commandes -->
-    <div class="section">
-      <h2>Commandes reçues</h2>
-      <table id="orders-table">
-        <thead>
-          <tr><th>Client</th><th>Produits</th><th>Total</th><th>Paiement</th><th>Date</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- Gestion avis -->
-    <div class="section">
-      <h2>Avis clients</h2>
-      <table id="reviews-table">
-        <thead>
-          <tr><th>Nom</th><th>Email</th><th>Message</th><th>Note</th><th>Actions</th></tr>
-        </thead>
-        <tbody></tbody>
-      </table>
-    </div>
-
-    <!-- Gestion messagerie -->
-    <div class="section">
-      <h2>Messagerie en direct</h2>
-      <div style="display: flex; gap: 20px; flex-wrap: wrap">
-        <div style="flex:1;min-width:200px">
-          <h4>Utilisateurs</h4>
-          <ul id="user-list" style="list-style:none;padding-left:0"></ul>
-        </div>
-        <div style="flex:2;min-width:300px">
-          <h4>Discussion</h4>
-          <div id="chat-view" style="border:1px solid #ccc;padding:10px;height:300px;overflow-y:auto;background:white;margin-bottom:10px;border-radius:5px"></div>
-          <form id="chat-form" onsubmit="sendAdminMsg(event)">
-            <input type="text" id="admin-msg" placeholder="Message..." style="width:100%;padding:10px;border:1px solid #ccc;border-radius:5px" />
-          </form>
-        </div>
-      </div>
-    </div>
-    </div> <!-- fin admin-div -->
-
-  <!-- Firebase SDK -->
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>
-  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
-
-  <script>
+  </div>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-auth-compat.js"></script>  <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>  <script>
     const firebaseConfig = {
       apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
       authDomain: "informatique-shop-53a25.firebaseapp.com",
       projectId: "informatique-shop-53a25",
+      storageBucket: "informatique-shop-53a25.firebasestorage.app",
+      messagingSenderId: "1070472171156",
+      appId: "1:1070472171156:web:6214bbe7726c12ce666e81"
     };
-
     firebase.initializeApp(firebaseConfig);
     const auth = firebase.auth();
     const db = firebase.firestore();
@@ -162,18 +118,6 @@
     const adminDiv = document.getElementById('admin-div');
     const loginError = document.getElementById('login-error');
 
-    const productsTableBody = document.querySelector('#products-table tbody');
-    const ordersTableBody = document.querySelector('#orders-table tbody');
-    const reviewsTableBody = document.querySelector('#reviews-table tbody');
-
-    const productForm = document.getElementById('product-form');
-    const productIdInput = document.getElementById('product-id');
-    const titleInput = document.getElementById('title');
-    const priceInput = document.getElementById('price');
-    const categoryInput = document.getElementById('category');
-    const imgInput = document.getElementById('img');
-    const linkInput = document.getElementById('link');
-
     auth.onAuthStateChanged(user => {
       if (user) {
         loginDiv.style.display = 'none';
@@ -181,7 +125,7 @@
         loadProducts();
         loadOrders();
         loadReviews();
-        loadChats();
+        loadVisits();
       } else {
         loginDiv.style.display = 'block';
         adminDiv.classList.add('hidden');
@@ -192,197 +136,116 @@
       const email = document.getElementById('email').value.trim();
       const password = document.getElementById('password').value.trim();
       loginError.textContent = '';
-      if (!email || !password) {
-        loginError.textContent = 'Veuillez remplir tous les champs.';
-        return;
-      }
-      auth.signInWithEmailAndPassword(email, password)
-        .catch(e => {
-          loginError.textContent = e.message;
-        });
+      if (!email || !password) return loginError.textContent = 'Veuillez remplir tous les champs.';
+      auth.signInWithEmailAndPassword(email, password).catch(e => loginError.textContent = e.message);
     }
-
-    function logout() {
-      auth.signOut();
-    }
+    function logout() { auth.signOut(); }
 
     function loadProducts() {
+      const tbody = document.querySelector('#products-table tbody');
       db.collection('products').orderBy('title').onSnapshot(snapshot => {
-        productsTableBody.innerHTML = '';
+        tbody.innerHTML = '';
         snapshot.forEach(doc => {
           const p = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${p.title}</td>
-            <td>${p.price} FCFA</td>
-            <td>${p.category}</td>
-            <td>
-              <button onclick="editProduct('${doc.id}')">Modifier</button>
-              <button onclick="deleteProduct('${doc.id}')">Supprimer</button>
-            </td>
-          `;
-          productsTableBody.appendChild(tr);
+          tbody.innerHTML += `<tr><td>${p.title}</td><td>${p.price} FCFA</td><td>${p.category}</td><td><button onclick="editProduct('${doc.id}')">Modifier</button><button onclick="deleteProduct('${doc.id}')">Supprimer</button></td></tr>`;
         });
       });
     }
-
-    productForm.addEventListener('submit', e => {
-      e.preventDefault();
-      const id = productIdInput.value;
-      const data = {
-        title: titleInput.value.trim(),
-        price: Number(priceInput.value),
-        category: categoryInput.value,
-        img: imgInput.value.trim(),
-        link: linkInput.value.trim()
-      };
-      if (!data.title || !data.category || !data.img || isNaN(data.price)) {
-        alert('Veuillez remplir tous les champs obligatoires.');
-        return;
-      }
-      if (id) {
-        db.collection('products').doc(id).update(data)
-          .then(() => {
-            alert('Produit modifié avec succès.');
-            productForm.reset();
-            productIdInput.value = '';
-          })
-          .catch(e => alert('Erreur : ' + e.message));
-      } else {
-        db.collection('products').add(data)
-          .then(() => {
-            alert('Produit ajouté avec succès.');
-            productForm.reset();
-          })
-          .catch(e => alert('Erreur : ' + e.message));
-      }
-    });
 
     function editProduct(id) {
       db.collection('products').doc(id).get().then(doc => {
         if (doc.exists) {
           const p = doc.data();
-          productIdInput.value = doc.id;
-          titleInput.value = p.title;
-          priceInput.value = p.price;
-          categoryInput.value = p.category;
-          imgInput.value = p.img;
-          linkInput.value = p.link || '';
-          window.scrollTo({ top: 0, behavior: 'smooth' });
+          document.getElementById('product-id').value = doc.id;
+          document.getElementById('title').value = p.title;
+          document.getElementById('price').value = p.price;
+          document.getElementById('category').value = p.category;
+          document.getElementById('img').value = p.img;
+          document.getElementById('link').value = p.link || '';
+          window.scrollTo({top: 0, behavior: 'smooth'});
         }
       });
     }
-
     function deleteProduct(id) {
       if (confirm('Supprimer ce produit ?')) {
-        db.collection('products').doc(id).delete()
-          .then(() => alert('Produit supprimé.'))
-          .catch(e => alert('Erreur : ' + e.message));
+        db.collection('products').doc(id).delete();
       }
     }
+    document.getElementById('product-form').addEventListener('submit', e => {
+      e.preventDefault();
+      const id = document.getElementById('product-id').value;
+      const data = {
+        title: document.getElementById('title').value.trim(),
+        price: Number(document.getElementById('price').value),
+        category: document.getElementById('category').value,
+        img: document.getElementById('img').value.trim(),
+        link: document.getElementById('link').value.trim()
+      };
+      if (!data.title || !data.category || !data.img || isNaN(data.price)) {
+        alert('Veuillez remplir correctement tous les champs.');
+        return;
+      }
+      if (id) {
+        db.collection('products').doc(id).update(data).then(() => {
+          alert('Produit modifié.');
+          e.target.reset();
+          document.getElementById('product-id').value = '';
+        });
+      } else {
+        db.collection('products').add(data).then(() => {
+          alert('Produit ajouté.');
+          e.target.reset();
+        });
+      }
+    });
 
     function loadOrders() {
+      const tbody = document.querySelector('#orders-table tbody');
       db.collection('orders').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-        ordersTableBody.innerHTML = '';
+        tbody.innerHTML = '';
         snapshot.forEach(doc => {
           const o = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${o.name}</td>
-            <td>${o.items}</td>
-            <td>${o.total} FCFA</td>
-            <td>${o.payment}</td>
-            <td>${o.timestamp?.toDate().toLocaleString() || ''}</td>
-          `;
-          ordersTableBody.appendChild(tr);
+          tbody.innerHTML += `<tr><td>${o.name}</td><td>${o.items}</td><td>${o.total} FCFA</td><td>${o.payment}</td><td>${o.timestamp?.toDate().toLocaleString() || ''}</td></tr>`;
         });
       });
     }
 
     function loadReviews() {
+      const tbody = document.querySelector('#reviews-table tbody');
       db.collection('reviews').orderBy('timestamp', 'desc').onSnapshot(snapshot => {
-        reviewsTableBody.innerHTML = '';
+        tbody.innerHTML = '';
         snapshot.forEach(doc => {
           const r = doc.data();
-          const tr = document.createElement('tr');
-          tr.innerHTML = `
-            <td>${r.name}</td>
-            <td>${r.email}</td>
-            <td>${r.message}</td>
-            <td>${r.rating || ''}</td>
-            <td><button onclick="deleteReview('${doc.id}')">Supprimer</button></td>
-          `;
-          reviewsTableBody.appendChild(tr);
+          tbody.innerHTML += `<tr><td>${r.name}</td><td>${r.email}</td><td>${r.message}</td><td>${r.rating || ''}</td><td><button onclick="deleteReview('${doc.id}')">Supprimer</button></td></tr>`;
         });
       });
     }
-
     function deleteReview(id) {
       if (confirm('Supprimer cet avis ?')) {
-        db.collection('reviews').doc(id).delete()
-          .then(() => alert('Avis supprimé.'))
-          .catch(e => alert('Erreur : ' + e.message));
+        db.collection('reviews').doc(id).delete();
       }
     }
-    // ===== MESSAGERIE DIRECTE =====
 
-    let currentChatId = null;
-
-    function loadChats() {
-      const userList = document.getElementById('user-list');
-      db.collection('Messagerie').orderBy('created', 'desc').onSnapshot(snapshot => {
-        userList.innerHTML = '';
+    function loadVisits() {
+      const totalSpan = document.getElementById('visit-total');
+      const dayList = document.getElementById('visits-by-day');
+      db.collection('visits').get().then(snapshot => {
+        totalSpan.textContent = snapshot.size;
+        const byDate = {};
         snapshot.forEach(doc => {
-          const data = doc.data();
+          const d = doc.data().timestamp?.toDate();
+          if (d) {
+            const dateStr = d.toISOString().slice(0, 10);
+            byDate[dateStr] = (byDate[dateStr] || 0) + 1;
+          }
+        });
+        dayList.innerHTML = '';
+        Object.entries(byDate).sort().forEach(([date, count]) => {
           const li = document.createElement('li');
-          li.style.cursor = 'pointer';
-          li.style.padding = '8px';
-          li.style.borderBottom = '1px solid #eee';
-          li.textContent = data.userName || doc.id;
-          li.onclick = () => openChat(doc.id, data.userName);
-          userList.appendChild(li);
+          li.textContent = `${date} : ${count} visite(s)`;
+          dayList.appendChild(li);
         });
       });
     }
-
-    function openChat(userId, name) {
-      currentChatId = userId;
-      const chatView = document.getElementById('chat-view');
-      chatView.innerHTML = `<p><strong>${name}</strong></p>`;
-
-      db.collection('Messagerie').doc(userId).collection('messages')
-        .orderBy('timestamp')
-        .onSnapshot(snapshot => {
-          chatView.innerHTML = `<p><strong>${name}</strong></p>`;
-          snapshot.forEach(doc => {
-            const msg = doc.data();
-            const div = document.createElement('div');
-            div.textContent = msg.text;
-            div.style.margin = '8px 0';
-            div.style.padding = '8px 12px';
-            div.style.borderRadius = '8px';
-            div.style.maxWidth = '70%';
-            div.style.background = msg.from === 'admin' ? '#007bff' : '#e4e6eb';
-            div.style.color = msg.from === 'admin' ? 'white' : 'black';
-            div.style.alignSelf = msg.from === 'admin' ? 'flex-end' : 'flex-start';
-            chatView.appendChild(div);
-          });
-          chatView.scrollTop = chatView.scrollHeight;
-        });
-    }
-
-    function sendAdminMsg(e) {
-      e.preventDefault();
-      const input = document.getElementById('admin-msg');
-      const text = input.value.trim();
-      if (!text || !currentChatId) return;
-      db.collection("Messagerie").doc(currentChatId).collection("messages").add({
-        text,
-        from: "admin",
-        timestamp: firebase.firestore.FieldValue.serverTimestamp()
-      });
-      input.value = '';
-    }
-  </script>
-</body>
+  </script></body>
 </html>
