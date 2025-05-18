@@ -130,6 +130,21 @@
 
 <!-- Script bouton WhatsApp -->
 <script src="js/whatsapp-button.js"></script>
+<script>
+  // Initialiser Firebase si ce n’est pas déjà fait
+  const db = firebase.firestore();
 
+  // Fonction de log de visite
+  function logVisit(page = window.location.pathname) {
+    db.collection('visits').add({
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent,
+      page: page
+    }).catch(err => console.error('Erreur de log visite:', err));
+  }
+
+  // Enregistre automatiquement la visite
+  logVisit();
+</script>
 </body>
 </html>
