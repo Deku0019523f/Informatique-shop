@@ -4,31 +4,48 @@
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1.0"/>
   <title>Informatique Shop - Accueil</title>
+  <link rel="stylesheet" href="https://unpkg.com/aos@2.3.4/dist/aos.css"/>
   <style>
+    :root {
+      --primary: #007bff;
+      --secondary: #00bcd4;
+      --bg: #f9f9f9;
+      --text: #333;
+      --white: #fff;
+    }
+    @media (prefers-color-scheme: dark) {
+      :root {
+        --bg: #121212;
+        --text: #eee;
+        --white: #1f1f1f;
+      }
+    }
     body {
       font-family: 'Segoe UI', sans-serif;
       margin: 0;
-      background: #f9f9f9;
-      color: #333;
+      background: var(--bg);
+      color: var(--text);
     }
     header {
-      background: linear-gradient(120deg, #007bff, #00bcd4);
+      background: linear-gradient(120deg, var(--primary), var(--secondary));
       color: white;
       text-align: center;
       padding: 60px 20px;
-      animation: fadeIn 1.2s ease-out;
     }
     header h1 { font-size: 2.5rem; margin-bottom: 10px; }
     header p { font-size: 1.2rem; margin-top: 0; }
     nav {
-      background: #fff;
+      background: var(--white);
       padding: 10px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
       text-align: center;
+      position: sticky;
+      top: 0;
+      z-index: 10;
     }
     nav a {
       margin: 0 15px;
-      color: #007bff;
+      color: var(--primary);
       text-decoration: none;
       font-weight: bold;
     }
@@ -36,10 +53,9 @@
       max-width: 900px;
       margin: auto;
       padding: 40px 20px;
-      animation: fadeInUp 0.8s ease forwards;
     }
     section h2 {
-      color: #007bff;
+      color: var(--primary);
       margin-bottom: 10px;
     }
     .cta {
@@ -47,7 +63,7 @@
       margin-top: 30px;
     }
     .cta a {
-      background: #007bff;
+      background: var(--primary);
       color: white;
       padding: 12px 25px;
       border-radius: 5px;
@@ -64,14 +80,26 @@
       padding: 20px;
       margin-top: 50px;
     }
-    @keyframes fadeIn {
-      from { opacity: 0; transform: translateY(-20px); }
+
+    .toast {
+      position: fixed;
+      bottom: 20px;
+      right: 20px;
+      background: var(--primary);
+      color: white;
+      padding: 12px 20px;
+      border-radius: 5px;
+      box-shadow: 0 2px 6px rgba(0,0,0,0.3);
+      z-index: 1000;
+      display: none;
+      animation: fadeUp 0.5s ease;
+    }
+
+    @keyframes fadeUp {
+      from { opacity: 0; transform: translateY(20px); }
       to { opacity: 1; transform: translateY(0); }
     }
-    @keyframes fadeInUp {
-      from { opacity: 0; transform: translateY(30px); }
-      to { opacity: 1; transform: translateY(0); }
-    }
+
     @media (max-width: 600px) {
       header h1 { font-size: 2rem; }
       header p { font-size: 1rem; }
@@ -80,7 +108,7 @@
 </head>
 <body>
 
-<header>
+<header data-aos="fade-down">
   <h1>Informatique Shop</h1>
   <p>Boostez votre présence numérique avec nos outils et services en ligne</p>
 </header>
@@ -92,7 +120,7 @@
   <a href="contact.html">Contact</a>
 </nav>
 
-<section>
+<section data-aos="fade-up">
   <h2>Notre mission</h2>
   <p>
     Nous fournissons des solutions numériques accessibles à tous : abonnements, outils, formations et automatisation. 
@@ -100,7 +128,7 @@
   </p>
 </section>
 
-<section>
+<section data-aos="fade-up" data-aos-delay="100">
   <h2>Ce que nous proposons</h2>
   <ul>
     <li><strong>Abonnements pas chers :</strong> Netflix, TikTok Monétisé, etc.</li>
@@ -110,16 +138,16 @@
     <li><strong>Forfaits internet CI :</strong> Orange jusqu’à 100Go à prix cassés</li>
   </ul>
   <div class="cta">
-    <a href="boutique.html">Voir les produits</a>
+    <a href="boutique.html" onclick="showToast('Redirection vers la boutique...')">Voir les produits</a>
   </div>
 </section>
 
-<section>
+<section data-aos="fade-up" data-aos-delay="200">
   <h2>Ils nous font confiance</h2>
   <p>Des centaines de clients satisfaits chaque mois. Consultez leurs <a href="reviews.html">avis</a> et rejoignez la communauté.</p>
 </section>
 
-<section>
+<section data-aos="fade-up" data-aos-delay="300">
   <h2>Une question ?</h2>
   <p>Écrivez-nous facilement via WhatsApp ou notre <a href="contact.html">formulaire de contact</a>. Nous répondons rapidement.</p>
 </section>
@@ -128,16 +156,29 @@
   © 2025 Informatique Shop — Tous droits réservés
 </footer>
 
+<div class="toast" id="toast"></div>
+
 <!-- Scripts -->
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
-<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="https://unpkg.com/aos@2.3.4/dist/aos.js"></script>
+<script>AOS.init();</script>
+<script>
+  function showToast(message) {
+    const toast = document.getElementById("toast");
+    toast.textContent = message;
+    toast.style.display = "block";
+    setTimeout(() => { toast.style.display = "none"; }, 3000);
+  }
+</script>
 <script src="js/whatsapp-button.js"></script>
 
+<!-- Firebase Log de visite -->
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script>
   const firebaseConfig = {
     apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
     authDomain: "informatique-shop-53a25.firebaseapp.com",
-    projectId: "informatique-shop-53a25",
+    projectId: "informatique-shop-53a25"
   };
   firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
@@ -146,12 +187,8 @@
     db.collection('visits').add({
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       userAgent: navigator.userAgent,
-      page: page
-    }).then(() => {
-      console.log("Visite enregistrée");
-    }).catch(err => {
-      console.error("Erreur de log visite:", err.message);
-    });
+      page
+    }).catch(console.error);
   }
 
   logVisit();
