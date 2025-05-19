@@ -1,214 +1,48 @@
-if (!firebase.apps.length) {
-  firebase.initializeApp({
-    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
-    authDomain: "informatique-shop-53a25.firebaseapp.com",
-    projectId: "informatique-shop-53a25",
-  });
-}
+const db = firebase.firestore(); let products = []; let cart = [];
 
-const db = firebase.firestore();
-let allProducts = [];
-let cart = [];
+function renderProducts() { const list = document.getElementById('product-list'); const search = document.getElementById('search-bar').value.toLowerCase(); const category = document.getElementById('category-filter').value; list.innerHTML = '';
 
-const categories = ["Abonnement", "Logiciel", "FREE"];
+products.forEach(p => { if ( (category === 'All' || p.category === category) && p.title.toLowerCase().includes(search) ) { const card = document.createElement('div'); card.className = 'product'; const isPromo = p.discountPrice && p.discountUntil?.seconds * 1000 > Date.now(); const displayPrice = isPromo ? <del>${p.price} FCFA</del> <strong>${p.discountPrice} FCFA</strong> : (p.price === 0 ? 'Gratuit' : p.price + ' FCFA'); const countdown = isPromo ? <small class="countdown" data-end="${p.discountUntil.seconds * 1000}"></small> : '';
 
-function renderAllProducts(search = "", filterCat = "All") {
-  const container = document.getElementById("product-list");
-  container.innerHTML = "";
-
-  const lowerSearch = search.toLowerCase();
-
-  categories.forEach(cat => {
-    if (filterCat !== "All" && filterCat !== cat) return;
-
-    const sectionProducts = allProducts.filter(p =>
-      p.category === cat &&
-      (p.title.toLowerCase().includes(lowerSearch) || p.category.toLowerCase().includes(lowerSearch))
-    );
-
-    if (sectionProducts.length) {
-      const section = document.createElement("div");
-      section.innerHTML = `<h2 style="color:#007bff">${cat}</h2>`;
-
-      sectionProducts.forEach(p => {
-        const div = document.createElement("div");
-        div.className = "product";
-
-        const now = new Date();
-        let prixHTML = `<p>${p.price == 0 ? "Gratuit" : p.price + " FCFA"}</p>`;
-        let bouton = "";
-
-        // Vérifie promo active
-        const nowMs = now.getTime();
-        let discountActive = p.discountPrice && p.discountUntil?.seconds * 1000 > nowMs;
-
-        if (discountActive) {
-          prixHTML = `
-            <p>
-              <span style="text-decoration:line-through; color:gray;">${p.price} FCFA</span>
-              <span style="color:red; font-weight:bold;">${p.discountPrice} FCFA</span><br>
-              <small id="timer-${p.title.replace(/\s/g, "")}"></small>
-            </p>`;
-          setCountdown(`timer-${p.title.replace(/\s/g, "")}`, p.discountUntil.seconds * 1000);
-        }
-
-        if (p.price == 0 && p.link) {
-          bouton = `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`;
-        } else {
-          bouton = `<button onclick="addToCartByTitle('${p.title}')">Ajouter au panier</button>`;
-        }
-
-        // Calcul % réduction
-        let discountPercent = 0;
-        if (discountActive) {
-          discountPercent = Math.round(100 - (p.discountPrice / p.price) * 100);
-        }
-
-        div.innerHTML = `
-          <div style="position:relative; display:inline-block;">
-            <img src="${p.img}" alt="${p.title}" />
-            ${
-              discountPercent > 0
-                ? `<div style="
-                    position:absolute;
-                    top:5px; left:5px;
-                    background:red;
-                    color:white;
-                    padding: 3px 7px;
-                    font-weight:bold;
-                    font-size:14px;
-                    border-radius: 3px;
-                    z-index:10;
-                  ">-${discountPercent}%</div>`
-                : ''
-            }
-          </div>
-          <h3>${p.title}</h3>
-          ${prixHTML}
-          ${bouton}
-        `;
-        section.appendChild(div);
-      });
-
-      container.appendChild(section);
+card.innerHTML = `
+    <img src="${p.img}" alt="${p.title}">
+    <h3>${p.title}</h3>
+    <p>${displayPrice}</p>
+    ${countdown}
+    ${p.link && p.price === 0
+      ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
+      : `<button onclick="addToCart('${p.id}')">Ajouter au panier</button>`
     }
-  });
+  `;
+  list.appendChild(card);
 }
 
-function setCountdown(id, endTime) {
-  const el = document.getElementById(id);
-  if (!el) return;
+}); }
 
-  function update() {
-    const now = new Date().getTime();
-    const diff = endTime - now;
+function updateCountdowns() { document.querySelectorAll('.countdown').forEach(el => { const end = parseInt(el.dataset.end); const remaining = end - Date.now(); if (remaining > 0) { const h = Math.floor(remaining / (1000 * 60 * 60)); const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)); const s = Math.floor((remaining % (1000 * 60)) / 1000); el.textContent = Promo: ${h}h ${m}m ${s}s; } else { el.textContent = 'Promo terminée'; } }); } setInterval(updateCountdowns, 1000);
 
-    if (diff <= 0) {
-      el.innerText = "Offre expirée";
-      return;
-    }
+function updateCart() { const container = document.getElementById('cart-items'); const totalDisplay = document.getElementById('cart-total'); const countDisplay = document.getElementById('cart-count'); const sumDisplay = document.getElementById('cart-sum'); const orderBtn = document.getElementById('order-btn'); container.innerHTML = ''; let total = 0;
 
-    const h = Math.floor(diff / (1000 * 60 * 60));
-    const m = Math.floor((diff % (1000 * 60 * 60)) / (1000 * 60));
-    const s = Math.floor((diff % (1000 * 60)) / 1000);
-    el.innerText = `Expire dans ${h}h ${m}m ${s}s`;
-    setTimeout(update, 1000);
-  }
+if (cart.length === 0) { container.textContent = 'Aucun produit pour le moment.'; orderBtn.style.display = 'none'; } else { cart.forEach(item => { const div = document.createElement('div'); div.innerHTML = ${item.title} x${item.qty} = ${item.price * item.qty} FCFA  <input type="number" value="${item.qty}" min="1" onchange="updateQty('${item.id}', this.value)" /> <button onclick="removeFromCart('${item.id}')">x</button>; container.appendChild(div); total += item.price * item.qty; }); orderBtn.style.display = 'inline-block'; }
 
-  update();
-}
+totalDisplay.textContent = 'Total : ' + total + ' FCFA'; countDisplay.textContent = cart.length; sumDisplay.textContent = total + ' FCFA'; }
 
-function addToCartByTitle(title) {
-  const p = allProducts.find(i => i.title === title);
-  if (!p) return;
+function addToCart(id) { const item = products.find(p => p.id === id); const exist = cart.find(c => c.id === id); const price = item.discountPrice && item.discountUntil?.seconds * 1000 > Date.now() ? item.discountPrice : item.price;
 
-  const nowMs = Date.now();
-  const discountActive = p.discountPrice && p.discountUntil?.seconds * 1000 > nowMs;
-  const price = discountActive ? p.discountPrice : p.price;
+if (exist) { exist.qty += 1; } else { cart.push({ ...item, qty: 1, price }); } updateCart(); }
 
-  const found = cart.find(i => i.title === p.title);
-  if (found) {
-    found.qty++;
-  } else {
-    cart.push({ title: p.title, qty: 1, price });
-  }
-  updateCart();
-}
+function updateQty(id, qty) { const item = cart.find(c => c.id === id); if (item) { item.qty = parseInt(qty); updateCart(); } }
 
-function updateCart() {
-  const list = document.getElementById("cart-items");
-  const count = document.getElementById("cart-count");
-  const sum = document.getElementById("cart-sum");
+function removeFromCart(id) { cart = cart.filter(c => c.id !== id); updateCart(); }
 
-  list.innerHTML = "";
-  let total = 0;
+function clearCart() { cart = []; updateCart(); }
 
-  cart.forEach((item, i) => {
-    const row = document.createElement("div");
-    row.innerHTML = `
-      ${item.title} x${item.qty} = ${item.qty * item.price} FCFA
-      <input type="number" value="${item.qty}" onchange="changeQty(${i}, this.value)">
-      <button onclick="removeFromCart(${i})">Supprimer</button>
-    `;
-    list.appendChild(row);
-    total += item.qty * item.price;
-  });
+function sendOrder() { const name = document.getElementById('client-name').value.trim(); const payment = document.getElementById('payment-method').value; if (!name || !payment) { alert('Veuillez remplir votre nom et méthode de paiement.'); return; } let msg = *Nouvelle commande :*%0A; let total = 0; cart.forEach(item => { msg += - ${item.title} x${item.qty} = ${item.qty * item.price} FCFA%0A; total += item.qty * item.price; }); msg += Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}; window.open(https://wa.me/2250575719113?text=${encodeURIComponent(msg)}); }
 
-  document.getElementById("cart-total").textContent = "Total : " + total + " FCFA";
-  document.getElementById("order-btn").style.display = cart.length ? "inline-block" : "none";
-  count.textContent = cart.length;
-  sum.textContent = total + " FCFA";
-}
+['search-bar', 'category-filter'].forEach(id => { document.getElementById(id).addEventListener('input', renderProducts); });
 
-function changeQty(i, qty) {
-  cart[i].qty = parseInt(qty);
-  updateCart();
-}
+db.collection('products').onSnapshot(snapshot => { products = []; snapshot.forEach(doc => { products.push({ id: doc.id, ...doc.data() }); }); renderProducts(); });
 
-function removeFromCart(i) {
-  cart.splice(i, 1);
-  updateCart();
-}
+updateCart();
 
-function clearCart() {
-  cart = [];
-  updateCart();
-}
-
-function sendOrder() {
-  const name = document.getElementById("client-name").value.trim();
-  const payment = document.getElementById("payment-method").value;
-  if (!name || !payment) return alert("Remplissez votre nom et méthode de paiement.");
-
-  let msg = `*Nouvelle commande :*%0A`;
-  let total = 0;
-  cart.forEach(i => {
-    msg += `- ${i.title} x${i.qty} = ${i.qty * i.price} FCFA%0A`;
-    total += i.qty * i.price;
-  });
-  msg += `Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}`;
-  window.open(`https://wa.me/2250575719113?text=${encodeURI(msg)}`);
-}
-
-document.getElementById("search-bar").addEventListener("input", () => {
-  const q = document.getElementById("search-bar").value;
-  const c = document.getElementById("category-filter").value;
-  renderAllProducts(q, c);
-});
-
-document.getElementById("category-filter").addEventListener("change", () => {
-  const q = document.getElementById("search-bar").value;
-  const c = document.getElementById("category-filter").value;
-  renderAllProducts(q, c);
-});
-
-window.onload = () => {
-  db.collection("products").orderBy("title").onSnapshot(snapshot => {
-    allProducts = [];
-    snapshot.forEach(doc => {
-      allProducts.push(doc.data());
-    });
-    renderAllProducts();
-    updateCart();
-  });
-};
+  
