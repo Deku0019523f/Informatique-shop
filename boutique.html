@@ -107,6 +107,16 @@
       text-align: center;
       margin: 20px 0;
     }
+    .badge {
+      position: absolute;
+      top: 10px;
+      left: 10px;
+      background: red;
+      color: white;
+      padding: 3px 6px;
+      border-radius: 5px;
+      font-size: 12px;
+    }
   </style>
 </head>
 <body>
@@ -126,6 +136,7 @@
 </div>
 
 <main>
+
   <div class="filters">
     <input type="text" id="search-bar" placeholder="Rechercher un produit..." />
     <select id="category-filter">
@@ -153,39 +164,15 @@
   </section>
 
   <section id="product-list"></section>
+
 </main>
 
-<!-- Firebase SDK -->
+<!-- Firebase + App -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+
+<!-- Ton script principal -->
 <script src="main.js"></script>
-<script src="js/whatsapp-button.js"></script>
-
-<script>
-  // Initialisation Firebase
-  const firebaseConfig = {
-    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
-    authDomain: "informatique-shop-53a25.firebaseapp.com",
-    projectId: "informatique-shop-53a25",
-  };
-  firebase.initializeApp(firebaseConfig);
-  const db = firebase.firestore();
-
-  // Enregistre la visite
-  function logVisit(page = window.location.pathname) {
-    db.collection('visits').add({
-      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
-      userAgent: navigator.userAgent,
-      page: page
-    }).then(() => {
-      console.log('Visite enregistrée');
-    }).catch(err => {
-      console.error('Erreur visite :', err.message);
-    });
-  }
-
-  logVisit();
-</script>
 
 </body>
 </html>
