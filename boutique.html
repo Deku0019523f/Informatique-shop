@@ -1,4 +1,5 @@
-<!DOCTYPE html><html lang="fr">
+<!DOCTYPE html>
+<html lang="fr">
 <head>
   <meta charset="UTF-8" />
   <meta name="viewport" content="width=device-width, initial-scale=1" />
@@ -54,7 +55,6 @@
       border-radius: 8px;
       margin-bottom: 15px;
       box-shadow: 0 0 5px rgba(0,0,0,0.1);
-      position: relative;
     }
     .product img {
       max-width: 100%;
@@ -107,21 +107,10 @@
       text-align: center;
       margin: 20px 0;
     }
-    .badge {
-      position: absolute;
-      background: red;
-      color: white;
-      padding: 3px 8px;
-      font-size: 0.75rem;
-      font-weight: bold;
-      top: 10px;
-      left: 10px;
-      border-radius: 5px;
-      box-shadow: 0 0 3px rgba(0,0,0,0.2);
-    }
   </style>
 </head>
 <body>
+
 <header>
   <h1>Informatique Shop</h1>
   <nav>
@@ -131,9 +120,11 @@
     <a href="contact.html">Contact</a>
   </nav>
 </header>
+
 <div id="cart-summary">
   Articles : <span id="cart-count">0</span> | Total : <span id="cart-sum">0 FCFA</span>
 </div>
+
 <main>
   <div class="filters">
     <input type="text" id="search-bar" placeholder="Rechercher un produit..." />
@@ -144,6 +135,7 @@
       <option value="Logiciel">Logiciel</option>
     </select>
   </div>
+
   <section id="cart">
     <h3>Panier</h3>
     <div id="cart-items">Aucun produit pour le moment.</div>
@@ -159,21 +151,41 @@
     <button onclick="clearCart()">Vider le panier</button>
     <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
   </section>
+
   <section id="product-list"></section>
 </main>
+
+<!-- Firebase SDK -->
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
 <script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
 <script src="main.js"></script>
+<script src="js/whatsapp-button.js"></script>
+
 <script>
+  // Initialisation Firebase
+  const firebaseConfig = {
+    apiKey: "AIzaSyC2EZx8g3HPjfIC5ELQKdwofNifn3xCgbo",
+    authDomain: "informatique-shop-53a25.firebaseapp.com",
+    projectId: "informatique-shop-53a25",
+  };
+  firebase.initializeApp(firebaseConfig);
   const db = firebase.firestore();
+
+  // Enregistre la visite
   function logVisit(page = window.location.pathname) {
     db.collection('visits').add({
       timestamp: firebase.firestore.FieldValue.serverTimestamp(),
       userAgent: navigator.userAgent,
       page: page
-    }).catch(err => console.error('Erreur de log visite:', err));
+    }).then(() => {
+      console.log('Visite enregistrée');
+    }).catch(err => {
+      console.error('Erreur visite :', err.message);
+    });
   }
+
   logVisit();
 </script>
+
 </body>
-      </html>
+</html>
