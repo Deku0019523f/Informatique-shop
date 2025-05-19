@@ -1,48 +1,179 @@
-const db = firebase.firestore(); let products = []; let cart = [];
-
-function renderProducts() { const list = document.getElementById('product-list'); const search = document.getElementById('search-bar').value.toLowerCase(); const category = document.getElementById('category-filter').value; list.innerHTML = '';
-
-products.forEach(p => { if ( (category === 'All' || p.category === category) && p.title.toLowerCase().includes(search) ) { const card = document.createElement('div'); card.className = 'product'; const isPromo = p.discountPrice && p.discountUntil?.seconds * 1000 > Date.now(); const displayPrice = isPromo ? <del>${p.price} FCFA</del> <strong>${p.discountPrice} FCFA</strong> : (p.price === 0 ? 'Gratuit' : p.price + ' FCFA'); const countdown = isPromo ? <small class="countdown" data-end="${p.discountUntil.seconds * 1000}"></small> : '';
-
-card.innerHTML = `
-    <img src="${p.img}" alt="${p.title}">
-    <h3>${p.title}</h3>
-    <p>${displayPrice}</p>
-    ${countdown}
-    ${p.link && p.price === 0
-      ? `<a href="${p.link}" target="_blank"><button>Télécharger</button></a>`
-      : `<button onclick="addToCart('${p.id}')">Ajouter au panier</button>`
+<!DOCTYPE html><html lang="fr">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1" />
+  <title>Boutique - Informatique Shop</title>
+  <style>
+    body {
+      font-family: Arial, sans-serif;
+      background: #f4f4f4;
+      margin: 0;
+      padding: 0;
+      color: #333;
     }
-  `;
-  list.appendChild(card);
-}
-
-}); }
-
-function updateCountdowns() { document.querySelectorAll('.countdown').forEach(el => { const end = parseInt(el.dataset.end); const remaining = end - Date.now(); if (remaining > 0) { const h = Math.floor(remaining / (1000 * 60 * 60)); const m = Math.floor((remaining % (1000 * 60 * 60)) / (1000 * 60)); const s = Math.floor((remaining % (1000 * 60)) / 1000); el.textContent = Promo: ${h}h ${m}m ${s}s; } else { el.textContent = 'Promo terminée'; } }); } setInterval(updateCountdowns, 1000);
-
-function updateCart() { const container = document.getElementById('cart-items'); const totalDisplay = document.getElementById('cart-total'); const countDisplay = document.getElementById('cart-count'); const sumDisplay = document.getElementById('cart-sum'); const orderBtn = document.getElementById('order-btn'); container.innerHTML = ''; let total = 0;
-
-if (cart.length === 0) { container.textContent = 'Aucun produit pour le moment.'; orderBtn.style.display = 'none'; } else { cart.forEach(item => { const div = document.createElement('div'); div.innerHTML = ${item.title} x${item.qty} = ${item.price * item.qty} FCFA  <input type="number" value="${item.qty}" min="1" onchange="updateQty('${item.id}', this.value)" /> <button onclick="removeFromCart('${item.id}')">x</button>; container.appendChild(div); total += item.price * item.qty; }); orderBtn.style.display = 'inline-block'; }
-
-totalDisplay.textContent = 'Total : ' + total + ' FCFA'; countDisplay.textContent = cart.length; sumDisplay.textContent = total + ' FCFA'; }
-
-function addToCart(id) { const item = products.find(p => p.id === id); const exist = cart.find(c => c.id === id); const price = item.discountPrice && item.discountUntil?.seconds * 1000 > Date.now() ? item.discountPrice : item.price;
-
-if (exist) { exist.qty += 1; } else { cart.push({ ...item, qty: 1, price }); } updateCart(); }
-
-function updateQty(id, qty) { const item = cart.find(c => c.id === id); if (item) { item.qty = parseInt(qty); updateCart(); } }
-
-function removeFromCart(id) { cart = cart.filter(c => c.id !== id); updateCart(); }
-
-function clearCart() { cart = []; updateCart(); }
-
-function sendOrder() { const name = document.getElementById('client-name').value.trim(); const payment = document.getElementById('payment-method').value; if (!name || !payment) { alert('Veuillez remplir votre nom et méthode de paiement.'); return; } let msg = *Nouvelle commande :*%0A; let total = 0; cart.forEach(item => { msg += - ${item.title} x${item.qty} = ${item.qty * item.price} FCFA%0A; total += item.qty * item.price; }); msg += Total : *${total} FCFA*%0A*Nom :* ${name}%0A*Paiement :* ${payment}; window.open(https://wa.me/2250575719113?text=${encodeURIComponent(msg)}); }
-
-['search-bar', 'category-filter'].forEach(id => { document.getElementById(id).addEventListener('input', renderProducts); });
-
-db.collection('products').onSnapshot(snapshot => { products = []; snapshot.forEach(doc => { products.push({ id: doc.id, ...doc.data() }); }); renderProducts(); });
-
-updateCart();
-
-  
+    header {
+      background: linear-gradient(120deg, #007bff, #00bcd4);
+      color: white;
+      text-align: center;
+      padding: 40px 20px;
+    }
+    header h1 {
+      margin: 0;
+      font-size: 2.5rem;
+    }
+    nav {
+      background: #fff;
+      padding: 10px;
+      text-align: center;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    nav a {
+      margin: 0 15px;
+      color: #007bff;
+      font-weight: bold;
+      text-decoration: none;
+    }
+    #cart-summary {
+      position: fixed;
+      top: 10px;
+      right: 10px;
+      background: #007bff;
+      color: white;
+      padding: 10px 15px;
+      border-radius: 8px;
+      z-index: 1000;
+    }
+    main {
+      max-width: 900px;
+      margin: 100px auto 40px;
+      padding: 0 15px;
+    }
+    .product {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 15px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+      position: relative;
+    }
+    .product img {
+      max-width: 100%;
+      height: 150px;
+      object-fit: cover;
+      border-radius: 5px;
+    }
+    .product h3 {
+      margin: 10px 0 5px;
+    }
+    .product p {
+      margin: 5px 0 10px;
+    }
+    button {
+      background: #007bff;
+      color: white;
+      border: none;
+      padding: 10px 15px;
+      border-radius: 5px;
+      cursor: pointer;
+      transition: background 0.3s ease;
+    }
+    button:hover {
+      background: #0056b3;
+    }
+    #cart {
+      background: white;
+      padding: 15px;
+      border-radius: 8px;
+      margin-bottom: 30px;
+      box-shadow: 0 0 5px rgba(0,0,0,0.1);
+    }
+    #cart input[type=number] {
+      width: 60px;
+      padding: 5px;
+      margin-left: 10px;
+      border-radius: 4px;
+      border: 1px solid #ccc;
+    }
+    input, select {
+      padding: 8px;
+      margin-top: 10px;
+      width: 100%;
+      max-width: 300px;
+      display: block;
+      border-radius: 5px;
+      border: 1px solid #ccc;
+    }
+    .filters {
+      text-align: center;
+      margin: 20px 0;
+    }
+    .badge {
+      position: absolute;
+      background: red;
+      color: white;
+      padding: 3px 8px;
+      font-size: 0.75rem;
+      font-weight: bold;
+      top: 10px;
+      left: 10px;
+      border-radius: 5px;
+      box-shadow: 0 0 3px rgba(0,0,0,0.2);
+    }
+  </style>
+</head>
+<body>
+<header>
+  <h1>Informatique Shop</h1>
+  <nav>
+    <a href="index.html">Accueil</a>
+    <a href="boutique.html">Produits</a>
+    <a href="reviews.html">Avis</a>
+    <a href="contact.html">Contact</a>
+  </nav>
+</header>
+<div id="cart-summary">
+  Articles : <span id="cart-count">0</span> | Total : <span id="cart-sum">0 FCFA</span>
+</div>
+<main>
+  <div class="filters">
+    <input type="text" id="search-bar" placeholder="Rechercher un produit..." />
+    <select id="category-filter">
+      <option value="All">Toutes les catégories</option>
+      <option value="FREE">Gratuit</option>
+      <option value="Abonnement">Abonnement</option>
+      <option value="Logiciel">Logiciel</option>
+    </select>
+  </div>
+  <section id="cart">
+    <h3>Panier</h3>
+    <div id="cart-items">Aucun produit pour le moment.</div>
+    <div id="cart-total" style="font-weight:bold; margin-top:10px;"></div>
+    <input type="text" id="client-name" placeholder="Votre nom (obligatoire)" />
+    <select id="payment-method">
+      <option value="">Méthode de paiement</option>
+      <option value="Orange">Orange</option>
+      <option value="MTN">MTN</option>
+      <option value="Wave">Wave</option>
+      <option value="Crypto">Crypto</option>
+    </select>
+    <button onclick="clearCart()">Vider le panier</button>
+    <button id="order-btn" onclick="sendOrder()" style="display:none;">Commander via WhatsApp</button>
+  </section>
+  <section id="product-list"></section>
+</main>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-app-compat.js"></script>
+<script src="https://www.gstatic.com/firebasejs/10.12.0/firebase-firestore-compat.js"></script>
+<script src="main.js"></script>
+<script>
+  const db = firebase.firestore();
+  function logVisit(page = window.location.pathname) {
+    db.collection('visits').add({
+      timestamp: firebase.firestore.FieldValue.serverTimestamp(),
+      userAgent: navigator.userAgent,
+      page: page
+    }).catch(err => console.error('Erreur de log visite:', err));
+  }
+  logVisit();
+</script>
+</body>
+</html>
