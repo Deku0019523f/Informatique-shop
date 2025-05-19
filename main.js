@@ -67,14 +67,14 @@ function renderProducts() {
 
 function updateCountdowns() {
   document.querySelectorAll('.countdown').forEach(el => {
-    const end = +el.dataset.end;
+    const end = Number(el.dataset.end);
     const left = end - Date.now();
     if (left > 0) {
       const h = Math.floor(left / 3600000);
       const m = Math.floor((left % 3600000) / 60000);
-      el.textContent = `Promo expire dans ${h}h ${m}min`;
+      el.textContent = "Promo expire dans " + h + "h " + m + "min";
     } else {
-      el.textContent = 'Promo expirée';
+      el.textContent = "Promo expirée";
     }
   });
 }
